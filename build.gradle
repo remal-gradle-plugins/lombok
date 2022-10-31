@@ -2,7 +2,7 @@
 
 buildscript {
     dependencies {
-        classpath 'name.remal.gradle-plugins.toolkit:build-logic:0.35.0'
+        classpath 'name.remal.gradle-plugins.toolkit:build-logic:0.35.1'
     }
     repositories {
         mavenCentral()
@@ -28,10 +28,10 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        'name.remal.template-plugin' {
-            id = 'name.remal.template-plugin'
-            implementationClass = 'name.remal.gradleplugins.template.TemplatePlugin'
-            displayName = 'Template plugin'
+        'name.remal.lombok' {
+            id = 'name.remal.lombok'
+            implementationClass = 'name.remal.gradleplugins.lombok.LombokPlugin'
+            displayName = 'Configure Lombok annotation processor'
             description = property('repository-description')
         }
     }
