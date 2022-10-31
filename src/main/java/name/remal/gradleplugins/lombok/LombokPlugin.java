@@ -39,7 +39,6 @@ public class LombokPlugin implements Plugin<Project> {
 
         project.getPluginManager().withPlugin("java", __ -> configureJavaProject(
             project,
-            lombokExtension,
             lombokConf
         ));
     }
@@ -47,7 +46,6 @@ public class LombokPlugin implements Plugin<Project> {
 
     private static void configureJavaProject(
         Project project,
-        LombokExtension lombokExtension,
         Configuration lombokConf
     ) {
         SourceSetContainer sourceSets = getExtension(project, JavaPluginExtension.class).getSourceSets();
