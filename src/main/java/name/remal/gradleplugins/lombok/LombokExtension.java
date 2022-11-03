@@ -16,4 +16,14 @@ public abstract class LombokExtension {
         getLombokVersion().convention(getLombokDependency("lombok").getVersion());
     }
 
+
+    public abstract Property<Boolean> getOpenJavacPackages();
+
+    public abstract Property<Boolean> getFixAnnotationProcessorsOrder();
+
+    {
+        getOpenJavacPackages().convention(true);
+        getFixAnnotationProcessorsOrder().convention(true);
+    }
+
 }
