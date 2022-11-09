@@ -79,7 +79,7 @@ dependencies {
     lombokCoreArtifacts 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 
     lombokAddonsArtifacts 'com.github.spotbugs:spotbugs-annotations:4.7.3'
-    lombokAddonsArtifacts 'com.fasterxml.jackson.core:jackson-databind:2.13.4.2'
+    lombokAddonsArtifacts 'com.fasterxml.jackson.core:jackson-databind:2.14.0'
 }
 
 createLombokArtifactsConfiguration('lombokSources', false) { Configuration conf ->
