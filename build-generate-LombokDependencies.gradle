@@ -1,0 +1,77 @@
+tasks.named('generateJava') { Task task ->
+    inputs.files(configurations.lombokCoreArtifacts).withPropertyName('lombokCoreArtifacts')
+    inputs.files(configurations.lombokAddonsArtifacts).withPropertyName('lombokAddonsArtifacts').optional()
+    classFile('name.remal.gradleplugins.lombok', 'LombokDependencyType') {
+        it.writePackage()
+        it.println("")
+        it.writeBlock("enum ${it.simpleName}") {
+            it.println("CORE,")
+            it.println("ADDON,")
+            it.println(";")
+        }
+    }
+    classFile('name.remal.gradleplugins.lombok', 'LombokDependency') {
+        it.writePackage()
+        it.println("")
+        it.writeImport("lombok.Builder")
+        it.writeImport("lombok.Value")
+        it.println("")
+        it.println("@Value")
+        it.println("@Builder")
+        it.writeBlock("class ${it.simpleName}") {
+            it.println("LombokDependencyType type;")
+            it.println("String group;")
+            it.println("String name;")
+            it.println("String version;")
+        }
+    }
+    classFile('name.remal.gradleplugins.lombok', 'LombokDependencies') {
+        it.writePackage()
+        it.println("")
+        it.writeStaticImport("lombok.AccessLevel", "PRIVATE")
+        it.println("")
+        it.writeImport("com.google.common.collect.ImmutableMap")
+        it.writeImport("java.util.Map")
+        it.writeImport("lombok.NoArgsConstructor")
+        it.writeImport("lombok.val")
+        it.println("")
+        it.println("@NoArgsConstructor(access = PRIVATE)")
+        it.writeBlock("abstract class ${it.simpleName}") {
+            it.println("")
+            it.println("private static final Map<String, LombokDependency> MAPPING = ImmutableMap.<String, LombokDependency>builder()")
+            configurations.lombokCoreArtifacts.dependencies.forEach { Dependency dep ->
+                it.println("    .put(\"${it.escapeJava(dep.name)}\", LombokDependency.builder()")
+                it.println("        .type(LombokDependencyType.CORE)")
+                it.println("        .group(\"${it.escapeJava(dep.group)}\")")
+                it.println("        .name(\"${it.escapeJava(dep.name)}\")")
+                it.println("        .version(\"${it.escapeJava(dep.version)}\")")
+                it.println("        .build()")
+                it.println("    )")
+            }
+            configurations.lombokAddonsArtifacts.dependencies.forEach { Dependency dep ->
+                it.println("    .put(\"${it.escapeJava(dep.name)}\", LombokDependency.builder()")
+                it.println("        .type(LombokDependencyType.ADDON)")
+                it.println("        .group(\"${it.escapeJava(dep.group)}\")")
+                it.println("        .name(\"${it.escapeJava(dep.name)}\")")
+                it.println("        .version(\"${it.escapeJava(dep.version)}\")")
+                it.println("        .build()")
+                it.println("    )")
+            }
+            it.println("    .build();")
+
+            it.println("")
+            it.writeBlock("public static Map<String, LombokDependency> getLombokDependencies()") {
+                it.println("return MAPPING;")
+            }
+
+            it.println("")
+            it.writeBlock("public static LombokDependency getLombokDependency(String id)") {
+                it.println("val dependency = getLombokDependencies().get(id);")
+                it.writeBlock("if (dependency == null)") {
+                    it.println("throw new IllegalStateException(\"Lombok dependency is not registered: \" + id);")
+                }
+                it.println("return dependency;")
+            }
+        }
+    }
+}

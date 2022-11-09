@@ -1,7 +1,6 @@
 package name.remal.gradleplugins.lombok;
 
 import static java.util.Collections.emptyList;
-import static lombok.AccessLevel.NONE;
 import static name.remal.gradleplugins.lombok.JavacPackagesToOpenUtils.getJavacPackageOpenJvmArgs;
 import static name.remal.gradleplugins.lombok.JavacPackagesToOpenUtils.shouldJavacPackageOpenJvmArgsBeAdded;
 import static name.remal.gradleplugins.toolkit.JavaLauncherUtils.getJavaLauncherProviderFor;
@@ -10,7 +9,6 @@ import com.google.errorprone.annotations.ForOverride;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import lombok.Getter;
 import lombok.val;
 import name.remal.gradleplugins.toolkit.JavaInstallationMetadataUtils;
 import org.gradle.api.DefaultTask;
@@ -37,12 +35,10 @@ public abstract class AbstractLombokTask extends DefaultTask {
     }
 
     @ForOverride
-    @Internal
     protected void beforeExecute(JavaExecSpec execSpec) {
     }
 
     @ForOverride
-    @Internal
     protected void afterExecute(JavaExecSpec execSpec) {
     }
 
@@ -56,7 +52,6 @@ public abstract class AbstractLombokTask extends DefaultTask {
     public abstract Property<JavaLauncher> getJavaLauncher();
 
 
-    @Getter(NONE)
     private final String command;
 
     protected AbstractLombokTask(String command) {

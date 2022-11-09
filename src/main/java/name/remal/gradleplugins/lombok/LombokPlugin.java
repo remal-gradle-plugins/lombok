@@ -12,7 +12,6 @@ import static name.remal.gradleplugins.toolkit.ObjectUtils.defaultTrue;
 import static name.remal.gradleplugins.toolkit.ObjectUtils.doNotInline;
 import static name.remal.gradleplugins.toolkit.ObjectUtils.isEmpty;
 import static name.remal.gradleplugins.toolkit.TaskUtils.doBeforeTaskExecution;
-import static org.gradle.api.plugins.JavaPlugin.JAVADOC_TASK_NAME;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
@@ -67,13 +66,20 @@ public class LombokPlugin implements Plugin<Project> {
             });
         });
 
+        configureLombokTasks();
         configureJavacReflectionsAccess();
         configureAnnotationProcessorsOrder();
-        configureLombokTasks();
 
         project.getPluginManager().withPlugin("java", __ -> {
             configureSourceSetConfigurations();
             configureDelombokForAllSourceSets();
+        });
+    }
+
+
+    private void configureLombokTasks() {
+        project.getTasks().withType(AbstractLombokTask.class, task -> {
+            task.getToolClasspath().setFrom(lombokConf);
         });
     }
 
@@ -187,13 +193,6 @@ public class LombokPlugin implements Plugin<Project> {
     }
 
 
-    private void configureLombokTasks() {
-        project.getTasks().withType(AbstractLombokTask.class, task -> {
-            task.getToolClasspath().setFrom(lombokConf);
-        });
-    }
-
-
     private void configureSourceSetConfigurations() {
         getExtension(project, SourceSetContainer.class).all(sourceSet -> {
             configureConfiguration(project, sourceSet.getCompileOnlyConfigurationName(), conf -> {
@@ -237,7 +236,7 @@ public class LombokPlugin implements Plugin<Project> {
                 ));
             });
 
-            val javadocTaskName = sourceSet.getTaskName(JAVADOC_TASK_NAME, "");
+            val javadocTaskName = sourceSet.getJavadocTaskName();
             project.getTasks().withType(Javadoc.class)
                 .matching(it -> it.getName().equals(javadocTaskName))
                 .configureEach(javadoc -> {

@@ -1,0 +1,21 @@
+import org.gradle.util.GradleVersion
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+buildscript {
+    dependencies {
+        classpath 'name.remal.gradle-plugins.toolkit:build-logic:0-SNAPSHOT'
+    }
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+apply plugin: 'name.remal.toolkit.build-logic'
+
+dependencies {
+    api('name.remal.gradle-api:local-groovy') { version { strictly(GradleVersion.current().version) } }
+}

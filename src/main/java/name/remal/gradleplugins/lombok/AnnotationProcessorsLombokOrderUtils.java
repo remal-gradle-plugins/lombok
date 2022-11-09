@@ -61,12 +61,12 @@ abstract class AnnotationProcessorsLombokOrderUtils {
         return unmodifiableList(processorsList);
     }
 
-    private static int getProcessorOrder(String fileName) {
-        if (LOMBOK_PROCESSOR.matcher(fileName).matches()) {
+    private static int getProcessorOrder(String processor) {
+        if (LOMBOK_PROCESSOR.matcher(processor).matches()) {
             return 100;
         }
 
-        if (LOMBOK_RELATED_PROCESSOR.matcher(fileName).matches()) {
+        if (LOMBOK_RELATED_PROCESSOR.matcher(processor).matches()) {
             return 10;
         }
 

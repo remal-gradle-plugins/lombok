@@ -1,0 +1,116 @@
+import com.github.javaparser.JavaParser
+import com.github.javaparser.ParseProblemException
+import com.github.javaparser.ParseResult
+import com.github.javaparser.ParserConfiguration
+import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.ast.Modifier
+import com.github.javaparser.ast.body.FieldDeclaration
+import com.github.javaparser.ast.body.VariableDeclarator
+import com.github.javaparser.ast.expr.Expression
+import com.github.javaparser.ast.expr.ObjectCreationExpr
+import com.github.javaparser.ast.visitor.GenericVisitorAdapter
+
+tasks.named('generateJava') { Task task ->
+    inputs.files(configurations.lombokSources).withPropertyName('lombokSources')
+    classFile('name.remal.gradleplugins.lombok', 'LombokConfigurationKey') {
+        it.writePackage()
+        it.println("")
+        it.writeImport("lombok.Builder")
+        it.writeImport("lombok.Value")
+        it.println("")
+        it.println("@Value")
+        it.println("@Builder")
+        it.writeBlock("class ${it.simpleName}") {
+            it.println("String name;")
+        }
+    }
+    classFile('name.remal.gradleplugins.lombok', 'LombokConfigurationKeys') {
+        it.writePackage()
+        it.println("")
+        it.writeStaticImport("lombok.AccessLevel", "PRIVATE")
+        it.println("")
+        it.writeImport("com.google.common.collect.ImmutableList")
+        it.writeImport("java.util.List")
+        it.writeImport("javax.annotation.Nullable")
+        it.writeImport("lombok.NoArgsConstructor")
+        it.writeImport("lombok.val")
+        it.println("")
+        it.println("@NoArgsConstructor(access = PRIVATE)")
+        it.writeBlock("abstract class ${it.simpleName}") {
+            it.println("")
+            it.println("private static final List<LombokConfigurationKey> KEYS = ImmutableList.<LombokConfigurationKey>builder()")
+
+            FileTree lombokSourcesTree = project.files().asFileTree
+            configurations.lombokSources.files.forEach { File file ->
+                if (file.isDirectory()) {
+                    lombokSourcesTree += project.fileTree(file)
+                } else {
+                    lombokSourcesTree += project.zipTree(file)
+                }
+            }
+
+            Set<String> foundLombokConfigProperties = new LinkedHashSet<>()
+            lombokSourcesTree.matching { include('lombok/ConfigurationKeys.java') }.visit { FileVisitDetails fileVisitDetails ->
+                if (fileVisitDetails.isDirectory()) return
+
+                ParserConfiguration parserConfiguration = new ParserConfiguration()
+                parserConfiguration.languageLevel = ParserConfiguration.LanguageLevel.BLEEDING_EDGE
+
+                JavaParser javaParser = new JavaParser(parserConfiguration)
+                ParseResult<CompilationUnit> parseResult = javaParser.parse(fileVisitDetails.open())
+                if (!parseResult.problems.isEmpty()) throw new ParseProblemException(parseResult.problems)
+
+                CompilationUnit compilationUnit = parseResult.result.get()
+                compilationUnit.accept(
+                    new GenericVisitorAdapter() {
+                        Object visit(FieldDeclaration field, Object arg) {
+                            if (!field.getModifiers().contains(Modifier.publicModifier())) return super.visit(field, arg)
+                            if (!field.getModifiers().contains(Modifier.staticModifier())) return super.visit(field, arg)
+                            if (!field.getModifiers().contains(Modifier.finalModifier())) return super.visit(field, arg)
+
+                            VariableDeclarator variable = field.getVariable(0)
+                            if (variable.type.asClassOrInterfaceType().name.asString() != 'ConfigurationKey') return super.visit(field, arg)
+
+                            Expression untypedInitializer = variable.initializer.orElse(null)
+                            if (!(untypedInitializer instanceof ObjectCreationExpr)) return super.visit(field, arg)
+                            ObjectCreationExpr initializer = (ObjectCreationExpr) untypedInitializer
+
+                            String configKey = initializer.getArgument(0).asStringLiteralExpr().value
+                            if (!foundLombokConfigProperties.add(configKey.toLowerCase())) throw new GradleException("Dublicate Lombok config key: $configKey")
+
+                            it.println("    .add(LombokConfigurationKey.builder()")
+                            it.println("        .name(\"${it.escapeJava(configKey)}\")")
+                            it.println("        .build()")
+                            it.println("    )")
+
+                            return super.visit(field, arg)
+                        }
+                    }, null
+                )
+            }
+
+            [
+                'lombok.addLombokGeneratedAnnotation',
+                'lombok.addSuppressWarnings',
+                'lombok.noArgsConstructor.extraPrivate',
+                'lombok.data.flagUsage',
+                'lombok.value.flagUsage',
+            ].forEach {
+                if (!foundLombokConfigProperties.contains(it.toLowerCase())) throw new GradleException("Lombok config property is not found: $it")
+            }
+
+            it.println("    .build();")
+
+            it.println("")
+            it.println("@Nullable")
+            it.writeBlock("public static LombokConfigurationKey findLombokConfigurationKeyFor(String value)") {
+                it.writeBlock("for (val key : KEYS)") {
+                    it.writeBlock("if (key.getName().equalsIgnoreCase(value))") {
+                        it.println("return key;")
+                    }
+                }
+                it.println("return null;")
+            }
+        }
+    }
+}
