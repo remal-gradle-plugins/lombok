@@ -31,7 +31,6 @@ import lombok.Getter;
 import lombok.ToString;
 import lombok.val;
 import org.jetbrains.annotations.Unmodifiable;
-import org.jetbrains.annotations.UnmodifiableView;
 
 @ToString(of = "dir")
 public class LombokConfig {
@@ -56,7 +55,7 @@ public class LombokConfig {
     }
 
 
-    @UnmodifiableView
+    @Unmodifiable
     public List<Path> getInvolvedPaths() {
         return unmodifiableList(
             getAllConfigFiles().stream()

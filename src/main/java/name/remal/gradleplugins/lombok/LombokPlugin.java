@@ -206,6 +206,7 @@ public class LombokPlugin implements Plugin<Project> {
                 task.getSource().getFiles().stream()
                     .map(File::getAbsoluteFile)
                     .map(File::getParentFile)
+                    .filter(Objects::nonNull)
                     .distinct()
                     .map(LombokConfig::new)
                     .map(LombokConfig::getInvolvedPaths)
