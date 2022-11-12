@@ -18,7 +18,8 @@ abstract class ImportInstructionResolver {
 
     @SuppressWarnings("java:S3776")
     public static ResolvedImport resolveImport(ImportInstruction instruction) {
-        String value = instruction.getValue();
+        String value = instruction.getValue()
+            .replace('\\', '/');
 
         if (value.isEmpty()) {
             return ResolvedImportError.builderFor(instruction)
@@ -53,7 +54,7 @@ abstract class ImportInstructionResolver {
         val fileSystemPath = instructionFile.getFileSystemPath();
 
         Path filePath = fileSystemPath.getFileSystem().getPath(file);
-        if (file.startsWith("/") || file.startsWith("\\")) {
+        if (file.startsWith("/")) {
             filePath = normalizePath(filePath);
         }
 
@@ -126,8 +127,6 @@ abstract class ImportInstructionResolver {
             val firstChar = pathString.charAt(0);
             if (firstChar == '/') {
                 return Paths.get("/");
-            } else if (firstChar == '\\') {
-                return Paths.get("\\");
             } else if (path.isAbsolute()) {
                 return path;
             }

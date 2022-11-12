@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.Nullable;
 import lombok.CustomLog;
 import lombok.val;
 import name.remal.gradleplugins.lombok.config.LombokConfig;
@@ -35,6 +36,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.DependencyConstraint;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
@@ -59,16 +61,28 @@ public class LombokPlugin implements Plugin<Project> {
 
         this.lombokExtension = project.getExtensions().create(LOMBOK_EXTENSION_NAME, LombokExtension.class);
 
+        val lombokDependency = getLombokDependency("lombok");
         this.lombokConf = project.getConfigurations().create(LOMBOK_CONFIGURATION_NAME, conf -> {
             conf.setDescription("Lombok");
             conf.defaultDependencies(deps -> {
                 deps.add(createDependency(
                     project,
-                    getLombokDependency("lombok"),
-                    lombokExtension.getLombokVersion().get()
+                    lombokDependency,
+                    lombokExtension.getLombokVersion().getOrNull()
                 ));
             });
         });
+
+        lombokExtension.getLombokVersion().convention(project.provider(() ->
+            lombokConf.getAllDependencyConstraints().stream()
+                .filter(constraint -> lombokDependency.getGroup().equals(constraint.getGroup()))
+                .filter(constraint -> lombokDependency.getName().equals(constraint.getName()))
+                .map(DependencyConstraint::getVersion)
+                .filter(ObjectUtils::isNotEmpty)
+                .reduce((first, second) -> second)
+                .orElseGet(lombokDependency::getVersion)
+        ));
+
 
         configureLombokTasks();
         configureJavacReflectionsAccess();
@@ -295,13 +309,25 @@ public class LombokPlugin implements Plugin<Project> {
         ));
     }
 
-    private static Dependency createDependency(Project project, LombokDependency lombokDependency, String version) {
-        return project.getDependencies().create(format(
-            "%s:%s:%s",
-            lombokDependency.getGroup(),
-            lombokDependency.getName(),
-            version
-        ));
+    private static Dependency createDependency(
+        Project project,
+        LombokDependency lombokDependency,
+        @Nullable String version
+    ) {
+        if (isEmpty(version)) {
+            return project.getDependencies().create(format(
+                "%s:%s",
+                lombokDependency.getGroup(),
+                lombokDependency.getName()
+            ));
+        } else {
+            return project.getDependencies().create(format(
+                "%s:%s:%s",
+                lombokDependency.getGroup(),
+                lombokDependency.getName(),
+                version
+            ));
+        }
     }
 
 }

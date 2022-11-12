@@ -319,15 +319,6 @@ class ImportInstructionResolverTest {
         assertThat(ImportInstructionResolver.getDirPathOf(Paths.get("/dir/file")))
             .isEqualTo(Paths.get("/dir"));
 
-        assertThat(ImportInstructionResolver.getDirPathOf(Paths.get("\\")))
-            .isEqualTo(Paths.get("\\"));
-
-        assertThat(ImportInstructionResolver.getDirPathOf(Paths.get("\\file")))
-            .isEqualTo(Paths.get("\\"));
-
-        assertThat(ImportInstructionResolver.getDirPathOf(Paths.get("\\dir\\file")))
-            .isEqualTo(Paths.get("\\dir"));
-
         assertThat(ImportInstructionResolver.getDirPathOf(normalizePath(Paths.get("/"))))
             .isEqualTo(normalizePath(Paths.get("/")));
 
