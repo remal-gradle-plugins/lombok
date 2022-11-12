@@ -5,7 +5,7 @@ import lombok.Value;
 
 @Value
 @Builder
-class LombokConfigFileParseError implements WithFileLine {
+public class LombokConfigFileParseError implements WithFileLine {
 
     LombokConfigPath file;
 

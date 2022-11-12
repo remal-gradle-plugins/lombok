@@ -16,7 +16,7 @@ import lombok.With;
 @Value
 @Builder
 @With
-class LombokConfigFile implements WithFile {
+public class LombokConfigFile implements WithFile {
 
     LombokConfigPath file;
 

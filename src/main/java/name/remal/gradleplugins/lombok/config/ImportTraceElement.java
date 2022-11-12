@@ -5,7 +5,7 @@ import lombok.Value;
 
 @Value
 @Builder
-class ImportTraceElement implements WithFileLine {
+public class ImportTraceElement implements WithFileLine {
 
     public static ImportTraceElementBuilder builderFor(ResolvedImportFile resolvedImport) {
         return builder()

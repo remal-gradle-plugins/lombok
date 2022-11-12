@@ -8,7 +8,6 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
-import static lombok.AccessLevel.PRIVATE;
 import static name.remal.gradleplugins.lombok.config.LombokConfigFileParser.parseLombokConfigFile;
 import static name.remal.gradleplugins.lombok.config.LombokConfigFileProperty.byLombokConfigKey;
 import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.CLEAR;
@@ -58,7 +57,7 @@ public class LombokConfig {
     @Unmodifiable
     public List<Path> getInvolvedPaths() {
         return unmodifiableList(
-            getAllConfigFiles().stream()
+            getConfigFiles().stream()
                 .map(LombokConfigFile::getFile)
                 .map(LombokConfigPath::getFileSystemPath)
                 .collect(toList())
@@ -68,7 +67,7 @@ public class LombokConfig {
     @Unmodifiable
     public List<LombokConfigFileProperty> getAllProperties() {
         return unmodifiableList(
-            getAllConfigFiles().stream()
+            getConfigFiles().stream()
                 .map(LombokConfigFile::getProperties)
                 .flatMap(Collection::stream)
                 .collect(toList())
@@ -77,7 +76,7 @@ public class LombokConfig {
 
     @Nullable
     public String get(String key) {
-        val property = getAllConfigFiles().stream()
+        val property = getConfigFiles().stream()
             .map(LombokConfigFile::getProperties)
             .flatMap(Collection::stream)
             .filter(byLombokConfigKey(key))
@@ -95,7 +94,7 @@ public class LombokConfig {
     public List<String> getList(String key) {
         Set<String> result = new LinkedHashSet<>();
 
-        for (val configFile : getAllConfigFiles()) {
+        for (val configFile : getConfigFiles()) {
             for (val property : configFile.getProperties()) {
                 if (!property.is(key)) {
                     continue;
@@ -116,10 +115,10 @@ public class LombokConfig {
     }
 
 
-    @Getter(value = PRIVATE, lazy = true)
-    private final List<LombokConfigFile> allConfigFiles = resolveAllConfigFiles();
+    @Getter(lazy = true)
+    private final List<LombokConfigFile> configFiles = resolveConfigFiles();
 
-    private List<LombokConfigFile> resolveAllConfigFiles() {
+    private List<LombokConfigFile> resolveConfigFiles() {
         List<LombokConfigFile> result = new ArrayList<>();
         val isStopped = new AtomicBoolean(false);
         for (Path currentDir = dir; currentDir != null; currentDir = currentDir.getParent()) {

@@ -5,7 +5,7 @@ import lombok.Value;
 
 @Value
 @Builder
-class ImportInstruction implements WithFileLine {
+public class ImportInstruction implements WithFileLine {
 
     LombokConfigPath file;
 
