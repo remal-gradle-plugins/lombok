@@ -1,5 +1,6 @@
 # This file is generated automatically by `collectAllGradlePluginApiDependencies` Gradle task.
 # Do not modify it yourself unless you know what you are doing.
 
+org.ow2.asm:asm-bom:9.4:@pom
 org.projectlombok:lombok-mapstruct-binding:0.2.0
 org.projectlombok:lombok:1.18.24
