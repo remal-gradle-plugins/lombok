@@ -1,6 +1,5 @@
 package name.remal.gradleplugins.lombok;
 
-import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static name.remal.gradleplugins.toolkit.reflection.ReflectionUtils.getPropertyNameForGetter;
@@ -72,10 +71,10 @@ public abstract class DelombokFormat {
 
                 val name = getPropertyNameForGetter(method);
 
-                if (TRUE.equals(value)) {
-                    args.add(format("--format=%s", name));
-                } else if (FALSE.equals(value)) {
-                    // skip
+                if (value instanceof Boolean) {
+                    if (TRUE.equals(value)) {
+                        args.add(format("--format=%s", name));
+                    }
                 } else if (value instanceof DelombokFormatValue) {
                     args.add(format("--format=%s:%s", name, ((DelombokFormatValue) value).toArg()));
                 } else {

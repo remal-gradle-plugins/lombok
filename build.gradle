@@ -6,7 +6,7 @@ buildscript {
     String pluginRootSnapshotVersion = project.ext.pluginRootSnapshotVersion = '2-SNAPSHOT'
     dependencies {
         //classpath("$pluginRootGroupId:$pluginRootArtifactId:$pluginRootSnapshotVersion") { version { strictly(pluginRootSnapshotVersion) } }
-        classpath 'name.remal.gradle-plugins.toolkit:build-logic:0.36.1'
+        classpath 'name.remal.gradle-plugins.toolkit:build-logic:0.38.0'
     }
     repositories {
         mavenCentral()
@@ -30,6 +30,9 @@ apply plugin: 'name.remal.generate-sources'
 
 dependencies {
     relocateClasses 'com.google.guava:guava'
+
+
+    testImplementation 'com.google.jimfs:jimfs:1.2'
 }
 
 gradlePlugin {
@@ -77,9 +80,6 @@ createLombokArtifactsConfiguration('lombokAddonsArtifacts', false)
 dependencies {
     lombokCoreArtifacts 'org.projectlombok:lombok:1.18.24'
     lombokCoreArtifacts 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-
-    lombokAddonsArtifacts 'com.github.spotbugs:spotbugs-annotations:4.7.3'
-    lombokAddonsArtifacts 'com.fasterxml.jackson.core:jackson-databind:2.13.4.2'
 }
 
 createLombokArtifactsConfiguration('lombokSources', false) { Configuration conf ->

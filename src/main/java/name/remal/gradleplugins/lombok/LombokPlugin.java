@@ -16,13 +16,17 @@ import static name.remal.gradleplugins.toolkit.TaskUtils.doBeforeTaskExecution;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import lombok.CustomLog;
 import lombok.val;
+import name.remal.gradleplugins.lombok.config.LombokConfig;
 import name.remal.gradleplugins.toolkit.JavaInstallationMetadataUtils;
 import name.remal.gradleplugins.toolkit.ObjectUtils;
 import org.gradle.api.Action;
@@ -69,6 +73,7 @@ public class LombokPlugin implements Plugin<Project> {
         configureLombokTasks();
         configureJavacReflectionsAccess();
         configureAnnotationProcessorsOrder();
+        configureCompileInputFiles();
 
         project.getPluginManager().withPlugin("java", __ -> {
             configureSourceSetConfigurations();
@@ -189,6 +194,31 @@ public class LombokPlugin implements Plugin<Project> {
                 compilerArgs.set(processorIndex + 1, processorsArg);
                 compileOptions.setCompilerArgs(compilerArgs);
             });
+        });
+    }
+
+
+    private void configureCompileInputFiles() {
+        project.getTasks().withType(JavaCompile.class).configureEach(task -> {
+            task.getInputs().file(project.provider(() -> {
+                Set<Path> paths = new LinkedHashSet<>();
+
+                task.getSource().getFiles().stream()
+                    .map(File::getAbsoluteFile)
+                    .map(File::getParentFile)
+                    .distinct()
+                    .map(LombokConfig::new)
+                    .map(LombokConfig::getInvolvedPaths)
+                    .flatMap(Collection::stream)
+                    .forEach(paths::add);
+
+                val generatedSourcesDir = task.getOptions().getGeneratedSourceOutputDirectory().getAsFile().getOrNull();
+                if (generatedSourcesDir != null) {
+                    paths.addAll(new LombokConfig(generatedSourcesDir).getInvolvedPaths());
+                }
+
+                return paths;
+            })).optional(true);
         });
     }
 
