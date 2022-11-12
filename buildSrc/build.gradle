@@ -1,5 +1,3 @@
-import org.gradle.util.GradleVersion
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 buildscript {
@@ -16,6 +14,24 @@ buildscript {
 
 apply plugin: 'name.remal.toolkit.build-logic'
 
-dependencies {
-    api('name.remal.gradle-api:local-groovy') { version { strictly(GradleVersion.current().version) } }
+Configuration localGroovyConf = configurations.create('localGroovy') { Configuration conf ->
+    conf.dependencies.add(
+        project.dependencies.create('name.remal.gradle-api:local-groovy')
+    )
+}
+
+configurations.create('javaParser') { Configuration conf ->
+    configurations.api.extendsFrom(conf)
+    conf.defaultDependencies { DependencySet deps ->
+        String groupNameNotation = 'com.github.javaparser:javaparser-core'
+        String version = localGroovyConf.resolvedConfiguration.lenientConfiguration
+            .allModuleDependencies
+            .find { "${it.moduleGroup}:${it.moduleName}" == groupNameNotation }
+            ?.moduleVersion
+            ?: '3.17.0'
+        println version
+        deps.add(
+            project.dependencies.create("${groupNameNotation}:${version}")
+        )
+    }
 }
