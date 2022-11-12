@@ -124,11 +124,10 @@ abstract class ImportInstructionResolver {
 
         val pathString = path.toString();
         if (!pathString.isEmpty()) {
-            val firstChar = pathString.charAt(0);
-            if (firstChar == '/') {
-                return Paths.get("/");
-            } else if (path.isAbsolute()) {
+            if (path.isAbsolute()) {
                 return path;
+            } else if (pathString.charAt(0) == '/') {
+                return Paths.get("/");
             }
         }
 
