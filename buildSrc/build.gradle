@@ -4,7 +4,7 @@ import org.gradle.util.GradleVersion
 
 buildscript {
     dependencies {
-        classpath 'name.remal.gradle-plugins.toolkit:build-logic:0-SNAPSHOT'
+        classpath 'name.remal.gradle-plugins.toolkit:build-logic:0.38.0'
     }
     repositories {
         mavenCentral()
