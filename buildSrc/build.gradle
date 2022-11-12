@@ -29,7 +29,6 @@ configurations.create('javaParser') { Configuration conf ->
             .find { "${it.moduleGroup}:${it.moduleName}" == groupNameNotation }
             ?.moduleVersion
             ?: '3.17.0'
-        println version
         deps.add(
             project.dependencies.create("${groupNameNotation}:${version}")
         )
