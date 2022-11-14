@@ -213,6 +213,29 @@ class LombokConfigTest {
     }
 
     @Test
+    void clear() throws Throwable {
+        writeString(configA, join(
+            "\n",
+            "list += a",
+            "prop += a"
+        ));
+
+        writeString(configAb, join(
+            "\n",
+            "clear list",
+            "clear prop"
+        ));
+
+        val lombokConfig = new LombokConfig(configAbc);
+        assertThat(lombokConfig.getList("list"))
+            .as("list")
+            .isEmpty();
+        assertThat(lombokConfig.get("prop"))
+            .as("prop")
+            .isNull();
+    }
+
+    @Test
     void getAllProperties() throws Throwable {
         writeString(configA, join(
             "\n",
@@ -237,7 +260,7 @@ class LombokConfigTest {
         ));
 
         val lombokConfig = new LombokConfig(configAbc);
-        assertThat(lombokConfig.getAllProperties())
+        assertThat(lombokConfig.getProperties())
             .as("allProperties")
             .containsExactly(
                 LombokConfigFileProperty.builder()

@@ -9,34 +9,27 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static name.remal.gradleplugins.lombok.config.LombokConfigFileParser.parseLombokConfigFile;
-import static name.remal.gradleplugins.lombok.config.LombokConfigFileProperty.byLombokConfigKey;
-import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.CLEAR;
-import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.MINUS;
-import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.PLUS;
 import static name.remal.gradleplugins.toolkit.ObjectUtils.doNotInline;
 import static name.remal.gradleplugins.toolkit.PathUtils.normalizePath;
 
-import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.val;
 import org.jetbrains.annotations.Unmodifiable;
 
 @ToString(of = "dir")
-public class LombokConfig {
+public class LombokConfig implements WithProperties {
 
     public static final String LOMBOK_CONFIG_FILE_NAME = doNotInline("lombok.config");
 
 
+    @Getter
     private final Path dir;
 
     public LombokConfig(Path path) {
@@ -54,6 +47,17 @@ public class LombokConfig {
     }
 
 
+    public Path getPath() {
+        return getConfigFiles().stream()
+            .map(LombokConfigFile::getFile)
+            .filter(LombokConfigPathSystem.class::isInstance)
+            .map(LombokConfigPathSystem.class::cast)
+            .map(LombokConfigPathSystem::getPath)
+            .reduce((first, second) -> second)
+            .orElseGet(this::getDir);
+    }
+
+
     @Unmodifiable
     public List<Path> getInvolvedPaths() {
         return unmodifiableList(
@@ -64,54 +68,16 @@ public class LombokConfig {
         );
     }
 
+
+    @Override
     @Unmodifiable
-    public List<LombokConfigFileProperty> getAllProperties() {
+    public List<LombokConfigFileProperty> getProperties() {
         return unmodifiableList(
             getConfigFiles().stream()
                 .map(LombokConfigFile::getProperties)
                 .flatMap(Collection::stream)
                 .collect(toList())
         );
-    }
-
-    @Nullable
-    public String get(String key) {
-        val property = getConfigFiles().stream()
-            .map(LombokConfigFile::getProperties)
-            .flatMap(Collection::stream)
-            .filter(byLombokConfigKey(key))
-            .reduce((first, second) -> second)
-            .orElse(null);
-
-        if (property == null || property.getOperator() == CLEAR) {
-            return null;
-        }
-
-        return property.getValue();
-    }
-
-    @Unmodifiable
-    public List<String> getList(String key) {
-        Set<String> result = new LinkedHashSet<>();
-
-        for (val configFile : getConfigFiles()) {
-            for (val property : configFile.getProperties()) {
-                if (!property.is(key)) {
-                    continue;
-                }
-
-                val operator = property.getOperator();
-                if (operator == PLUS) {
-                    result.add(property.getValue());
-                } else if (operator == MINUS) {
-                    result.remove(property.getValue());
-                } else if (operator == CLEAR) {
-                    result.clear();
-                }
-            }
-        }
-
-        return ImmutableList.copyOf(result);
     }
 
 

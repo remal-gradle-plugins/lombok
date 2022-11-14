@@ -2,7 +2,6 @@ package name.remal.gradleplugins.lombok.config;
 
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.toList;
-import static name.remal.gradleplugins.lombok.config.LombokConfigFileProperty.byLombokConfigKey;
 
 import java.util.List;
 import lombok.Builder;
@@ -16,7 +15,7 @@ import lombok.With;
 @Value
 @Builder
 @With
-public class LombokConfigFile implements WithFile {
+public class LombokConfigFile implements WithFile, WithProperties {
 
     LombokConfigPath file;
 
@@ -39,12 +38,7 @@ public class LombokConfigFile implements WithFile {
     boolean stopBubbling = calculateStopBubbling();
 
     private boolean calculateStopBubbling() {
-        return getProperties().stream()
-            .filter(byLombokConfigKey("config.stopBubbling"))
-            .map(LombokConfigFileProperty::getValue)
-            .map(Boolean::parseBoolean)
-            .reduce((first, second) -> second)
-            .orElse(false);
+        return getBoolean("config.stopBubbling", false);
     }
 
 

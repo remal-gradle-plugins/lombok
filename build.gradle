@@ -3,7 +3,7 @@
 buildscript {
     String pluginRootGroupId = project.ext.pluginRootGroupId = "name.remal.gradle-plugins.${rootProject.name}"
     String pluginRootArtifactId = project.ext.pluginRootArtifactId = rootProject.name
-    String pluginRootSnapshotVersion = project.ext.pluginRootSnapshotVersion = '2-SNAPSHOT'
+    String pluginRootSnapshotVersion = project.ext.pluginRootSnapshotVersion = '1-SNAPSHOT'
     dependencies {
         //classpath("$pluginRootGroupId:$pluginRootArtifactId:$pluginRootSnapshotVersion") { version { strictly(pluginRootSnapshotVersion) } }
         classpath 'name.remal.gradle-plugins.toolkit:build-logic:0.39.0'
@@ -94,3 +94,22 @@ createLombokArtifactsConfiguration('lombokSources', false) { Configuration conf 
 
 apply from: 'build-generate-LombokDependencies.gradle'
 apply from: 'build-generate-LombokConfigurationKeys.gradle'
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+tasks.named('generateJava') { Task task ->
+    String repositoryHtmlUrl = project.ext['repository-html-url']
+    inputs.property('repository-html-url', repositoryHtmlUrl)
+    classFile('name.remal.gradleplugins.lombok.config.rule', 'DocUtils') {
+        it.writePackage()
+        it.println("")
+        it.writeStaticImport("lombok.AccessLevel", "PRIVATE")
+        it.println("")
+        it.writeImport("lombok.NoArgsConstructor")
+        it.println("")
+        it.println("@NoArgsConstructor(access = PRIVATE)")
+        it.writeBlock("abstract class ${it.simpleName}") {
+            it.println("public static final String PLUGIN_REPOSITORY_HTML_URL = \"${it.escapeJava(repositoryHtmlUrl)}\";")
+        }
+    }
+}

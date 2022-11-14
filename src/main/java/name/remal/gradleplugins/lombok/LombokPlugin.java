@@ -1,5 +1,6 @@
 package name.remal.gradleplugins.lombok;
 
+import static java.lang.Boolean.FALSE;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static name.remal.gradleplugins.lombok.AnnotationProcessorsLombokOrderUtils.withFixedAnnotationProcessorFilesOrder;
@@ -11,7 +12,11 @@ import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtens
 import static name.remal.gradleplugins.toolkit.ObjectUtils.defaultTrue;
 import static name.remal.gradleplugins.toolkit.ObjectUtils.doNotInline;
 import static name.remal.gradleplugins.toolkit.ObjectUtils.isEmpty;
+import static name.remal.gradleplugins.toolkit.ObjectUtils.isNotEmpty;
+import static name.remal.gradleplugins.toolkit.ProjectUtils.afterEvaluateOrNow;
 import static name.remal.gradleplugins.toolkit.TaskUtils.doBeforeTaskExecution;
+import static org.gradle.api.plugins.JavaBasePlugin.CHECK_TASK_NAME;
+import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
@@ -27,7 +32,9 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import lombok.CustomLog;
 import lombok.val;
+import name.remal.gradleplugins.lombok.config.GenerateLombokConfig;
 import name.remal.gradleplugins.lombok.config.LombokConfig;
+import name.remal.gradleplugins.lombok.config.ValidateLombokConfig;
 import name.remal.gradleplugins.toolkit.JavaInstallationMetadataUtils;
 import name.remal.gradleplugins.toolkit.ObjectUtils;
 import org.gradle.api.Action;
@@ -37,6 +44,7 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencyConstraint;
+import org.gradle.api.file.FileTree;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
@@ -50,6 +58,8 @@ public class LombokPlugin implements Plugin<Project> {
     public static final String LOMBOK_EXTENSION_NAME = doNotInline("lombok");
     public static final String LOMBOK_CONFIGURATION_NAME = doNotInline("lombok");
     public static final String DELOMBOK_TASK_NAME = doNotInline("delombok");
+    public static final String VALIDATE_LOMBOK_CONFIG_TASK_NAME = doNotInline("validateLombokConfig");
+    public static final String GENERATE_LOMBOK_CONFIG_TASK_NAME = doNotInline("generateLombokConfig");
 
     private Project project;
     private LombokExtension lombokExtension;
@@ -88,6 +98,8 @@ public class LombokPlugin implements Plugin<Project> {
         configureJavacReflectionsAccess();
         configureAnnotationProcessorsOrder();
         configureCompileInputFiles();
+        configureConfigValidation();
+        configureConfigGeneration();
 
         project.getPluginManager().withPlugin("java", __ -> {
             configureSourceSetConfigurations();
@@ -188,7 +200,7 @@ public class LombokPlugin implements Plugin<Project> {
                 }
 
                 int processorIndex = compilerArgs.lastIndexOf("-processor");
-                if (processorIndex < 0 && processorIndex >= compilerArgs.size() - 1) {
+                if (processorIndex < 0 || processorIndex >= compilerArgs.size() - 1) {
                     return;
                 }
 
@@ -214,7 +226,7 @@ public class LombokPlugin implements Plugin<Project> {
 
     private void configureCompileInputFiles() {
         project.getTasks().withType(JavaCompile.class).configureEach(task -> {
-            task.getInputs().file(project.provider(() -> {
+            task.getInputs().files(project.provider(() -> {
                 Set<Path> paths = new LinkedHashSet<>();
 
                 task.getSource().getFiles().stream()
@@ -233,7 +245,64 @@ public class LombokPlugin implements Plugin<Project> {
                 }
 
                 return paths;
-            })).optional(true);
+            })).optional(true).withPathSensitivity(RELATIVE);
+        });
+    }
+
+
+    private void configureConfigValidation() {
+        project.getTasks().register(VALIDATE_LOMBOK_CONFIG_TASK_NAME, ValidateLombokConfig.class, task -> {
+            val javaCompileTasks = project.getTasks().withType(JavaCompile.class);
+            task.dependsOn(javaCompileTasks);
+
+            task.getDirectories().from(project.getLayout().getProjectDirectory());
+            task.getDirectories().from(project.provider(() ->
+                javaCompileTasks.stream()
+                    .map(JavaCompile::getSource)
+                    .map(FileTree::getFiles)
+                    .flatMap(Collection::stream)
+                    .map(File::getAbsoluteFile)
+                    .map(File::getParentFile)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .collect(toList())
+            ));
+        });
+
+        project.getPluginManager().withPlugin("java", __ -> {
+            project.getTasks().named(CHECK_TASK_NAME, task -> {
+                task.dependsOn(project.getTasks().withType(ValidateLombokConfig.class));
+            });
+        });
+    }
+
+
+    private void configureConfigGeneration() {
+        afterEvaluateOrNow(project, __ -> {
+            val isEnabled = lombokExtension.getConfig().getGenerate().getEnabled().getOrNull();
+            if (FALSE.equals(isEnabled)) {
+                return; // disabled explicitly
+            }
+
+            if (isEnabled == null) {
+                if (isNotEmpty(lombokExtension.getConfig().getGenerate().getProperties().getOrNull())) {
+                    logger.warn("`" + LOMBOK_EXTENSION_NAME + ".config.generate.properties` is not empty,"
+                        + " but `" + LOMBOK_EXTENSION_NAME + ".config.generate.enabled == null`."
+                        + " If you want to generate Lombok config file, enable this functionality by calling"
+                        + " `" + LOMBOK_EXTENSION_NAME + ".config.generate.enabled = true`."
+                    );
+                }
+                return; // disabled by default
+            }
+
+            project.getTasks().register(GENERATE_LOMBOK_CONFIG_TASK_NAME, GenerateLombokConfig.class, task -> {
+                task.getFile().convention(lombokExtension.getConfig().getGenerate().getFile());
+                task.getProperties().convention(lombokExtension.getConfig().getGenerate().getProperties());
+            });
+
+            project.getTasks().withType(JavaCompile.class).configureEach(task -> {
+                task.dependsOn(project.getTasks().withType(GenerateLombokConfig.class));
+            });
         });
     }
 

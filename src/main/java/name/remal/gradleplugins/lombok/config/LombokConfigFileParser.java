@@ -1,18 +1,20 @@
 package name.remal.gradleplugins.lombok.config;
 
 import static lombok.AccessLevel.PRIVATE;
+import static name.remal.gradleplugins.lombok.config.LombokConfigNormalizer.normalizeLombokConfigKey;
 import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.CLEAR;
 import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.MINUS;
 import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.PLUS;
 import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.SET;
-import static name.remal.gradleplugins.lombok.config.LombokConfigurationKeys.findLombokConfigurationKeyFor;
 import static name.remal.gradleplugins.toolkit.StringUtils.substringBefore;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.nio.file.attribute.FileTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import lombok.NoArgsConstructor;
+import lombok.Value;
 import lombok.val;
 
 /**
@@ -23,15 +25,25 @@ import lombok.val;
 @SuppressWarnings({"java:S6395", "java:S3776", "RegExpUnnecessaryNonCapturingGroup"})
 abstract class LombokConfigFileParser {
 
-    private static final ConcurrentMap<LombokConfigPath, LombokConfigFile> PARSE_CACHE = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<CacheKey, LombokConfigFile> PARSE_CACHE = new ConcurrentHashMap<>();
 
     private static final Pattern NEW_LINE = Pattern.compile("(?:\\r\\n)|(?:\\n\\r)|(?:\\n)|(?:\\r)");
 
     private static final Pattern PROPERTY = Pattern.compile("(?:clear\\s+([^=]+))|(?:(\\S*?)\\s*([-+]?=)\\s*(.*?))");
     private static final Pattern IMPORT = Pattern.compile("import\\s+(.+?)");
 
-    public static LombokConfigFile parseLombokConfigFile(LombokConfigPath file) {
-        return PARSE_CACHE.computeIfAbsent(file, LombokConfigFileParser::parseLombokConfigFileImpl);
+    public static LombokConfigFile parseLombokConfigFile(LombokConfigPath lombokConfigPath) {
+        val cacheKey = new CacheKey(lombokConfigPath, lombokConfigPath.getLastModifiedTime());
+        return PARSE_CACHE.computeIfAbsent(
+            cacheKey,
+            currentCacheKey -> parseLombokConfigFileImpl(currentCacheKey.getFile())
+        );
+    }
+
+    @Value
+    private static class CacheKey {
+        LombokConfigPath file;
+        FileTime lastModifiedTime;
     }
 
     @VisibleForTesting
@@ -62,7 +74,7 @@ abstract class LombokConfigFileParser {
             val propertyMatcher = PROPERTY.matcher(line);
             if (propertyMatcher.matches()) {
                 if (propertyMatcher.group(1) == null) {
-                    val key = normalizePropertyKey(propertyMatcher.group(2));
+                    val key = normalizeLombokConfigKey(propertyMatcher.group(2));
                     val operatorString = propertyMatcher.group(3);
                     val value = propertyMatcher.group(4);
 
@@ -97,7 +109,7 @@ abstract class LombokConfigFileParser {
                     );
 
                 } else {
-                    val key = normalizePropertyKey(propertyMatcher.group(1));
+                    val key = normalizeLombokConfigKey(propertyMatcher.group(1));
                     lombokConfigFileBuilder.property(LombokConfigFileProperty.builder()
                         .key(key)
                         .operator(CLEAR)
@@ -120,11 +132,6 @@ abstract class LombokConfigFileParser {
         }
 
         return lombokConfigFileBuilder.build();
-    }
-
-    private static String normalizePropertyKey(String key) {
-        val configurationKey = findLombokConfigurationKeyFor(key);
-        return configurationKey != null ? configurationKey.getName() : key.toLowerCase();
     }
 
 }

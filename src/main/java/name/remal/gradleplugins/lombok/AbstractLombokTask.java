@@ -81,6 +81,8 @@ public abstract class AbstractLombokTask extends DefaultTask {
         });
 
         afterExecute(execSpecRef.get());
+
+        setDidWork(true);
     }
 
 }
