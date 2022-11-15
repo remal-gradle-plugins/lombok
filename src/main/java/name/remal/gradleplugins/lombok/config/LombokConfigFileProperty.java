@@ -1,13 +1,12 @@
 package name.remal.gradleplugins.lombok.config;
 
-import java.io.Serializable;
 import java.util.function.Predicate;
 import lombok.Builder;
 import lombok.Value;
 
 @Value
 @Builder
-public class LombokConfigFileProperty implements WithFileLine, Serializable {
+public class LombokConfigFileProperty implements WithFileLine {
 
     LombokConfigPath file;
 
