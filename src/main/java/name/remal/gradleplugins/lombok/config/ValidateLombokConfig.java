@@ -2,10 +2,10 @@ package name.remal.gradleplugins.lombok.config;
 
 import static groovy.lang.Closure.DELEGATE_FIRST;
 import static java.lang.String.format;
-import static java.lang.System.identityHashCode;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.StreamSupport.stream;
+import static name.remal.gradleplugins.lombok.config.LombokConfigUtils.parseLombokConfigs;
 import static name.remal.gradleplugins.toolkit.PredicateUtils.not;
 import static name.remal.gradleplugins.toolkit.ReportContainerUtils.createReportContainerFor;
 import static name.remal.gradleplugins.toolkit.issues.Issue.newIssueBuilder;
@@ -14,14 +14,9 @@ import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
 
 import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
-import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.ServiceLoader;
 import javax.annotation.Nullable;
 import lombok.Getter;
@@ -29,7 +24,6 @@ import lombok.Setter;
 import lombok.val;
 import name.remal.gradleplugins.lombok.config.rule.LombokConfigRule;
 import name.remal.gradleplugins.lombok.config.rule.LombokConfigValidationContext;
-import name.remal.gradleplugins.toolkit.PathUtils;
 import name.remal.gradleplugins.toolkit.issues.CheckstyleHtmlIssuesRenderer;
 import name.remal.gradleplugins.toolkit.issues.CheckstyleXmlIssuesRenderer;
 import name.remal.gradleplugins.toolkit.issues.Issue;
@@ -87,26 +81,9 @@ public abstract class ValidateLombokConfig
     protected abstract ListProperty<LombokConfig> getLombokConfigs();
 
     {
-        getLombokConfigs().addAll(getProject().provider(() -> {
-            val directoryPaths = getDirectories().getFiles().stream()
-                .map(File::toPath)
-                .distinct()
-                .map(PathUtils::normalizePath)
-                .distinct()
-                .sorted(ValidateLombokConfig::comparePaths)
-                .collect(toList());
-
-            Map<List<LombokConfigPath>, LombokConfig> lombokConfigMap = new LinkedHashMap<>();
-            for (val directoryPath : directoryPaths) {
-                val lombokConfig = new LombokConfig(directoryPath);
-                val lombokConfigFiles = lombokConfig.getConfigFiles().stream()
-                    .map(LombokConfigFile::getFile)
-                    .collect(toList());
-                lombokConfigMap.computeIfAbsent(lombokConfigFiles, __ -> lombokConfig);
-            }
-
-            return new ArrayList<>(lombokConfigMap.values());
-        }));
+        getLombokConfigs().addAll(getProject().provider(() ->
+            parseLombokConfigs(getDirectories().getFiles())
+        ));
     }
 
     @InputFiles
@@ -194,21 +171,6 @@ public abstract class ValidateLombokConfig
             );
         }
 
-    }
-
-
-    private static int comparePaths(Path path1, Path path2) {
-        val fs1 = path1.getFileSystem();
-        val fs2 = path2.getFileSystem();
-        if (fs1 != fs2) {
-            int result = Integer.compare(identityHashCode(fs1), identityHashCode(fs2));
-            if (result == 0) {
-                result = path1.toString().compareTo(path2.toString());
-            }
-            return result;
-        }
-
-        return path1.compareTo(path2);
     }
 
 }

@@ -3,11 +3,13 @@ package name.remal.gradleplugins.lombok;
 import static java.lang.Boolean.FALSE;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static name.remal.gradleplugins.lombok.AnnotationProcessorsLombokOrderUtils.withFixedAnnotationProcessorFilesOrder;
 import static name.remal.gradleplugins.lombok.AnnotationProcessorsLombokOrderUtils.withFixedAnnotationProcessorsOrder;
 import static name.remal.gradleplugins.lombok.JavacPackagesToOpenUtils.shouldJavacPackageOpenJvmArgsBeAdded;
 import static name.remal.gradleplugins.lombok.JavacPackagesToOpenUtils.withJavacPackageOpens;
 import static name.remal.gradleplugins.lombok.LombokDependencies.getLombokDependency;
+import static name.remal.gradleplugins.lombok.config.LombokConfigUtils.parseLombokConfigs;
 import static name.remal.gradleplugins.toolkit.ExtensionContainerUtils.getExtension;
 import static name.remal.gradleplugins.toolkit.ObjectUtils.defaultTrue;
 import static name.remal.gradleplugins.toolkit.ObjectUtils.doNotInline;
@@ -21,19 +23,17 @@ import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import java.io.File;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import javax.annotation.Nullable;
 import lombok.CustomLog;
 import lombok.val;
 import name.remal.gradleplugins.lombok.config.GenerateLombokConfig;
 import name.remal.gradleplugins.lombok.config.LombokConfig;
+import name.remal.gradleplugins.lombok.config.LombokConfigUtils;
 import name.remal.gradleplugins.lombok.config.ValidateLombokConfig;
 import name.remal.gradleplugins.toolkit.JavaInstallationMetadataUtils;
 import name.remal.gradleplugins.toolkit.ObjectUtils;
@@ -42,9 +42,8 @@ import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencyConstraint;
-import org.gradle.api.file.FileTree;
+import org.gradle.api.artifacts.ExternalModuleDependency;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
@@ -111,6 +110,10 @@ public class LombokPlugin implements Plugin<Project> {
     private void configureLombokTasks() {
         project.getTasks().withType(AbstractLombokTask.class, task -> {
             task.getToolClasspath().setFrom(lombokConf);
+        });
+
+        project.getTasks().withType(Delombok.class, task -> {
+            task.getFormat().convention(lombokExtension.getDelombok().getFormat());
         });
     }
 
@@ -226,26 +229,12 @@ public class LombokPlugin implements Plugin<Project> {
 
     private void configureCompileInputFiles() {
         project.getTasks().withType(JavaCompile.class).configureEach(task -> {
-            task.getInputs().files(project.provider(() -> {
-                Set<Path> paths = new LinkedHashSet<>();
-
-                task.getSource().getFiles().stream()
-                    .map(File::getAbsoluteFile)
-                    .map(File::getParentFile)
-                    .filter(Objects::nonNull)
-                    .distinct()
-                    .map(LombokConfig::new)
+            task.getInputs().files(project.provider(() ->
+                parseLombokConfigs(task).stream()
                     .map(LombokConfig::getInvolvedPaths)
                     .flatMap(Collection::stream)
-                    .forEach(paths::add);
-
-                val generatedSourcesDir = task.getOptions().getGeneratedSourceOutputDirectory().getAsFile().getOrNull();
-                if (generatedSourcesDir != null) {
-                    paths.addAll(new LombokConfig(generatedSourcesDir).getInvolvedPaths());
-                }
-
-                return paths;
-            })).optional(true).withPathSensitivity(RELATIVE);
+                    .collect(toSet())
+            )).optional(true).withPathSensitivity(RELATIVE);
         });
     }
 
@@ -258,14 +247,8 @@ public class LombokPlugin implements Plugin<Project> {
             task.getDirectories().from(project.getLayout().getProjectDirectory());
             task.getDirectories().from(project.provider(() ->
                 javaCompileTasks.stream()
-                    .map(JavaCompile::getSource)
-                    .map(FileTree::getFiles)
-                    .flatMap(Collection::stream)
-                    .map(File::getAbsoluteFile)
-                    .map(File::getParentFile)
-                    .filter(Objects::nonNull)
-                    .distinct()
-                    .collect(toList())
+                    .flatMap(LombokConfigUtils::streamJavaCompileSourceDirs)
+                    .collect(toSet())
             ));
         });
 
@@ -335,6 +318,7 @@ public class LombokPlugin implements Plugin<Project> {
                     sourceSet.getCompileJavaTaskName(),
                     JavaCompile.class
                 );
+                delombok.dependsOn(javaCompileProvider);
 
                 delombok.getEncoding().set(project.provider(() ->
                     javaCompileProvider.get().getOptions().getEncoding()
@@ -361,6 +345,8 @@ public class LombokPlugin implements Plugin<Project> {
     }
 
 
+    //#region Utilities
+
     private static String getDelombokTaskNameFor(SourceSet sourceSet) {
         return sourceSet.getTaskName(DELOMBOK_TASK_NAME, "");
     }
@@ -369,8 +355,8 @@ public class LombokPlugin implements Plugin<Project> {
         project.getConfigurations().matching(it -> Objects.equals(it.getName(), name)).all(action);
     }
 
-    private static Dependency createDependency(Project project, LombokDependency lombokDependency) {
-        return project.getDependencies().create(format(
+    private static ExternalModuleDependency createDependency(Project project, LombokDependency lombokDependency) {
+        return (ExternalModuleDependency) project.getDependencies().create(format(
             "%s:%s:%s",
             lombokDependency.getGroup(),
             lombokDependency.getName(),
@@ -378,19 +364,19 @@ public class LombokPlugin implements Plugin<Project> {
         ));
     }
 
-    private static Dependency createDependency(
+    private static ExternalModuleDependency createDependency(
         Project project,
         LombokDependency lombokDependency,
         @Nullable String version
     ) {
         if (isEmpty(version)) {
-            return project.getDependencies().create(format(
+            return (ExternalModuleDependency) project.getDependencies().create(format(
                 "%s:%s",
                 lombokDependency.getGroup(),
                 lombokDependency.getName()
             ));
         } else {
-            return project.getDependencies().create(format(
+            return (ExternalModuleDependency) project.getDependencies().create(format(
                 "%s:%s:%s",
                 lombokDependency.getGroup(),
                 lombokDependency.getName(),
@@ -398,5 +384,7 @@ public class LombokPlugin implements Plugin<Project> {
             ));
         }
     }
+
+    //#endregion
 
 }

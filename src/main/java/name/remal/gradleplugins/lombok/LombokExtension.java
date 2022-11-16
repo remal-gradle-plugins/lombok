@@ -14,10 +14,18 @@ public abstract class LombokExtension {
 
     public abstract Property<String> getLombokVersion();
 
+
     private final LombokExtensionConfig config = getObjectFactory().newInstance(LombokExtensionConfig.class);
 
     public void config(Action<LombokExtensionConfig> action) {
         action.execute(config);
+    }
+
+
+    private final LombokExtensionDelombok delombok = getObjectFactory().newInstance(LombokExtensionDelombok.class);
+
+    public void delombok(Action<LombokExtensionDelombok> action) {
+        action.execute(delombok);
     }
 
 

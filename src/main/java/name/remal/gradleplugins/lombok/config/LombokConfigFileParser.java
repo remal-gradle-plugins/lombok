@@ -6,16 +6,15 @@ import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperato
 import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.MINUS;
 import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.PLUS;
 import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.SET;
+import static name.remal.gradleplugins.toolkit.PathUtils.getPathLastModifiedIfExists;
 import static name.remal.gradleplugins.toolkit.StringUtils.substringBefore;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.nio.file.attribute.FileTime;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import lombok.NoArgsConstructor;
-import lombok.Value;
 import lombok.val;
+import name.remal.gradleplugins.toolkit.cache.ToolkitCache;
+import name.remal.gradleplugins.toolkit.cache.ToolkitCacheBuilder;
 
 /**
  * See
@@ -25,26 +24,22 @@ import lombok.val;
 @SuppressWarnings({"java:S6395", "java:S3776", "RegExpUnnecessaryNonCapturingGroup"})
 abstract class LombokConfigFileParser {
 
-    private static final ConcurrentMap<CacheKey, LombokConfigFile> PARSE_CACHE = new ConcurrentHashMap<>();
-
     private static final Pattern NEW_LINE = Pattern.compile("(?:\\r\\n)|(?:\\n\\r)|(?:\\n)|(?:\\r)");
 
     private static final Pattern PROPERTY = Pattern.compile("(?:clear\\s+([^=]+))|(?:(\\S*?)\\s*([-+]?=)\\s*(.*?))");
     private static final Pattern IMPORT = Pattern.compile("import\\s+(.+?)");
 
+
+    private static final ToolkitCache<LombokConfigPath, LombokConfigFile> PARSE_CACHE =
+        new ToolkitCacheBuilder<LombokConfigPath, LombokConfigFile>()
+            .withLastModifiedTimeGetter(key -> getPathLastModifiedIfExists(key.getFileSystemPath()))
+            .withLoader(LombokConfigFileParser::parseLombokConfigFileImpl)
+            .build();
+
     public static LombokConfigFile parseLombokConfigFile(LombokConfigPath lombokConfigPath) {
-        val cacheKey = new CacheKey(lombokConfigPath, lombokConfigPath.getLastModifiedTime());
-        return PARSE_CACHE.computeIfAbsent(
-            cacheKey,
-            currentCacheKey -> parseLombokConfigFileImpl(currentCacheKey.getFile())
-        );
+        return PARSE_CACHE.get(lombokConfigPath);
     }
 
-    @Value
-    private static class CacheKey {
-        LombokConfigPath file;
-        FileTime lastModifiedTime;
-    }
 
     @VisibleForTesting
     @SuppressWarnings("StringSplitter")

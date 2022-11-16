@@ -86,4 +86,21 @@ public abstract class DelombokFormat {
         return args;
     }
 
+
+    @SneakyThrows
+    @SuppressWarnings("unchecked")
+    void convention(DelombokFormat other) {
+        for (val method : DelombokFormat.class.getMethods()) {
+            if (!isGetterOf(method, Property.class)) {
+                continue;
+            }
+
+            val thisProperty = (Property<Object>) method.invoke(this);
+            val otherProperty = (Property<Object>) method.invoke(other);
+            if (thisProperty != null && otherProperty != null) {
+                thisProperty.convention(otherProperty);
+            }
+        }
+    }
+
 }
