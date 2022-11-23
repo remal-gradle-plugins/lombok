@@ -82,11 +82,22 @@ dependencies {
     lombokCoreArtifacts 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 }
 
+Closure<ExternalModuleDependency> getLombokDependency = {
+    Dependency lombokDep = (ExternalModuleDependency) configurations.lombokCoreArtifacts.dependencies
+        .find { "${it.group}:${it.name}" == 'org.projectlombok:lombok' }
+    if (lombokDep == null) throw new GradleException("Lombok dependency can't be found")
+    return (ExternalModuleDependency) lombokDep
+}
+Closure<ExternalModuleDependency> getLombokMapStructBindingDependency = {
+    Dependency lombokDep = (ExternalModuleDependency) configurations.lombokCoreArtifacts.dependencies
+        .find { "${it.group}:${it.name}" == 'org.projectlombok:lombok-mapstruct-binding' }
+    if (lombokDep == null) throw new GradleException("Lombok MapStruct binding dependency can't be found")
+    return (ExternalModuleDependency) lombokDep
+}
+
 createLombokArtifactsConfiguration('lombokSources', false) { Configuration conf ->
     conf.defaultDependencies { deps ->
-        Dependency lombokDep = configurations.lombokCoreArtifacts.dependencies
-            .find { "${it.group}:${it.name}" == 'org.projectlombok:lombok' }
-        if (lombokDep == null) throw new GradleException("Lombok dependency can't be found")
+        ExternalModuleDependency lombokDep = getLombokDependency()
         Dependency dep = project.dependencies.create("${lombokDep.group}:${lombokDep.name}:${lombokDep.version}:sources")
         deps.add(dep)
     }
@@ -113,3 +124,37 @@ tasks.named('generateJava') { Task task ->
         }
     }
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+tasks.processReadme.readmeFileProcessors.add(
+    { File readmeFile ->
+        ExternalModuleDependency lombokDep = getLombokDependency()
+        ExternalModuleDependency lombokMapStructBindingDep = getLombokMapStructBindingDependency()
+
+        String content = readmeFile.getText('UTF-8')
+
+        [lombokDep, lombokMapStructBindingDep].forEach { dep ->
+            content = content.replaceAll(
+                "\\Q${dep.group}\\E([:/])\\Q${dep.name}\\E\\1\\d+(.\\d+)*"
+            ) {
+                String delim = it[1]
+                String notation = "${dep.group}${delim}${dep.name}${delim}${dep.version}"
+                logger.lifecycle('  Handling {}', notation)
+                return notation
+            }
+        }
+
+        content = content.replaceAll(
+            /(lombokVersion\s*=\s*(['"]))(?:(?!\2).)*\2/
+        ) {
+            String prefix = it[1]
+            String quote = it[2]
+            String replacement = "${prefix}${lombokDep.version}${quote}"
+            logger.lifecycle('  Handling {}', replacement)
+            return replacement
+        }
+
+        readmeFile.setText(content, 'UTF-8')
+    }
+)
