@@ -13,13 +13,27 @@ public interface LombokConfigValidationContext {
 
     Project getProject();
 
-    void report(Path path, @Nullable Integer lineNumber, @Language("TEXT") String message);
+    void report(
+        String rule,
+        Path path,
+        @Nullable Integer lineNumber,
+        @Language("TEXT") String message
+    );
 
-    default void report(Path path, @Language("TEXT") String message) {
-        report(path, null, message);
+    default void report(
+        String rule,
+        Path path,
+        @Language("TEXT") String message
+    ) {
+        report(rule, path, null, message);
     }
 
-    default void report(LombokConfigPath path, @Nullable Integer lineNumber, @Language("TEXT") String message) {
+    default void report(
+        String rule,
+        LombokConfigPath path,
+        @Nullable Integer lineNumber,
+        @Language("TEXT") String message
+    ) {
         if (path instanceof LombokConfigPathArchive) {
             message = format(
                 "Archive entry %s: %s",
@@ -28,11 +42,15 @@ public interface LombokConfigValidationContext {
             );
         }
 
-        report(path.getFileSystemPath(), lineNumber, message);
+        report(rule, path.getFileSystemPath(), lineNumber, message);
     }
 
-    default void report(LombokConfigPath path, @Language("TEXT") String message) {
-        report(path, null, message);
+    default void report(
+        String rule,
+        LombokConfigPath path,
+        @Language("TEXT") String message
+    ) {
+        report(rule, path, null, message);
     }
 
 }

@@ -14,7 +14,7 @@ public class ConfigureUtilityClassUsage implements LombokConfigRule {
     public void validate(LombokConfig config, LombokConfigValidationContext context) {
         val utilityClassUsage = config.getUsageFlag("lombok.utilityClass.flagUsage");
         if (utilityClassUsage == null) {
-            context.report(config.getPath(), format(
+            context.report(getName(), config.getPath(), format(
                 "Specify one of these values for `lombok.utilityClass.flagUsage`: `error`, `warning`, `allow`."
                     + " See %s/blob/main/config-rules/ConfigureUtilityClassUsage.md",
                 PLUGIN_REPOSITORY_HTML_URL

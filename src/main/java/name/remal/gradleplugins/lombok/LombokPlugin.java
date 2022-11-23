@@ -250,6 +250,8 @@ public class LombokPlugin implements Plugin<Project> {
                     .flatMap(LombokConfigUtils::streamJavaCompileSourceDirs)
                     .collect(toSet())
             ));
+
+            task.getDisabledRules().convention(lombokExtension.getConfig().getValidate().getDisabledRules());
         });
 
         project.getPluginManager().withPlugin("java", __ -> {

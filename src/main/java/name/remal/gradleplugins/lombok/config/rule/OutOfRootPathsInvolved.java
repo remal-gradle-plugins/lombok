@@ -24,7 +24,7 @@ public class OutOfRootPathsInvolved implements LombokConfigRule {
             .filter(not(it -> it.getFile().getFileSystemPath().startsWith(rootPath)))
             .collect(toList());
         if (!outsideRootConfigs.isEmpty()) {
-            context.report(rootPath, format(
+            context.report(getName(), rootPath, format(
                 "`%s` files outside of the root project or the repository root are involved into the build."
                     + " See %s/blob/main/config-rules/OutOfRootPathsInvolved.md"
                     + "\n* %s",

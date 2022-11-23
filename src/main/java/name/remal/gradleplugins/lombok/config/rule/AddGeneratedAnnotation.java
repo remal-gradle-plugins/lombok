@@ -21,7 +21,7 @@ public class AddGeneratedAnnotation implements LombokConfigRule {
             return;
         }
 
-        context.report(config.getPath(), format(
+        context.report(getName(), config.getPath(), format(
             "Configure `lombok.addLombokGeneratedAnnotation` or `lombok.addJavaxGeneratedAnnotation`."
                 + " See %s/blob/main/config-rules/AddGeneratedAnnotation.md",
             PLUGIN_REPOSITORY_HTML_URL

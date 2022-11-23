@@ -23,7 +23,7 @@ public class StopBubblingAtRoot implements LombokConfigRule {
             .orElse(null);
 
         if (rootConfigFile == null || !rootConfigFile.isStopBubbling()) {
-            context.report(rootPath, format(
+            context.report(getName(), rootPath, format(
                 "Root project or repository root doesn't contain %s file."
                     + " Create such a file with `config.stopBubbling = true` line to make the build system independent."
                     + " See %s/blob/main/config-rules/StopBubblingAtRoot.md",

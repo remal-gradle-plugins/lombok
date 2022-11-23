@@ -162,10 +162,11 @@ public abstract class ValidateLombokConfig
         }
 
         @Override
-        public void report(Path path, @Nullable Integer lineNumber, @Language("TEXT") String message) {
+        public void report(String rule, Path path, @Nullable Integer lineNumber, @Language("TEXT") String message) {
             issues.add(newIssueBuilder()
                 .sourceFile(path.toFile())
                 .message(textMessageOf(message))
+                .rule(rule)
                 .startLine(lineNumber)
                 .build()
             );
