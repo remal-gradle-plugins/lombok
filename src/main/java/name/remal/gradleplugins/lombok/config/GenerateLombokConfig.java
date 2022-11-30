@@ -8,6 +8,7 @@ import static java.nio.file.Files.readAllBytes;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toCollection;
+import static name.remal.gradleplugins.toolkit.LayoutUtils.getRootDirOf;
 import static name.remal.gradleplugins.toolkit.PathUtils.createParentDirectories;
 import static name.remal.gradleplugins.toolkit.PathUtils.normalizePath;
 
@@ -21,10 +22,12 @@ import name.remal.gradleplugins.toolkit.EditorConfig;
 import name.remal.gradleplugins.toolkit.PathIsOutOfRootPathException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
@@ -68,7 +71,8 @@ public abstract class GenerateLombokConfig extends DefaultTask {
 
         String lineSeparator;
         try {
-            lineSeparator = new EditorConfig(getProject()).getLineSeparatorFor(targetPath);
+            val editorConfig = new EditorConfig(getRootDir().getAsFile().get().toPath());
+            lineSeparator = editorConfig.getLineSeparatorFor(targetPath);
         } catch (PathIsOutOfRootPathException ignored) {
             lineSeparator = "\n";
         }
@@ -116,6 +120,17 @@ public abstract class GenerateLombokConfig extends DefaultTask {
         }
 
         setDidWork(true);
+    }
+
+
+    @Internal
+    protected abstract DirectoryProperty getRootDir();
+
+    {
+        val project = getProject();
+        getRootDir().set(project.getLayout().dir(project.provider(() ->
+            getRootDirOf(project)
+        )));
     }
 
 
