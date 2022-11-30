@@ -6,12 +6,11 @@ import java.nio.file.Path;
 import javax.annotation.Nullable;
 import name.remal.gradleplugins.lombok.config.LombokConfigPath;
 import name.remal.gradleplugins.lombok.config.LombokConfigPathArchive;
-import org.gradle.api.Project;
 import org.intellij.lang.annotations.Language;
 
 public interface LombokConfigValidationContext {
 
-    Project getProject();
+    Path getRootPath();
 
     void report(
         String rule,

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 import lombok.CustomLog;
 import lombok.val;
 import name.remal.gradleplugins.lombok.config.GenerateLombokConfig;
@@ -44,7 +45,9 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.DependencyConstraint;
 import org.gradle.api.artifacts.ExternalModuleDependency;
+import org.gradle.api.file.ProjectLayout;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.compile.JavaCompile;
@@ -52,7 +55,7 @@ import org.gradle.api.tasks.javadoc.Javadoc;
 import org.gradle.jvm.toolchain.JavaCompiler;
 
 @CustomLog
-public class LombokPlugin implements Plugin<Project> {
+public abstract class LombokPlugin implements Plugin<Project> {
 
     public static final String LOMBOK_EXTENSION_NAME = doNotInline("lombok");
     public static final String LOMBOK_CONFIGURATION_NAME = doNotInline("lombok");
@@ -120,6 +123,7 @@ public class LombokPlugin implements Plugin<Project> {
 
     @SuppressWarnings("java:S3776")
     private void configureJavacReflectionsAccess() {
+        val isEnabled = lombokExtension.getFixJavacReflectionsAccess();
         project.getTasks().withType(JavaCompile.class).configureEach(task -> {
             doBeforeTaskExecution(task, __ -> {
                 val compileOptions = task.getOptions();
@@ -127,7 +131,7 @@ public class LombokPlugin implements Plugin<Project> {
                     return;
                 }
 
-                if (!defaultTrue(lombokExtension.getOpenJavacPackages().getOrNull())) {
+                if (!defaultTrue(isEnabled.getOrNull())) {
                     return;
                 }
 
@@ -164,6 +168,7 @@ public class LombokPlugin implements Plugin<Project> {
 
     @SuppressWarnings({"UnstableApiUsage", "java:S3776"})
     private void configureAnnotationProcessorsOrder() {
+        val isEnabled = lombokExtension.getFixAnnotationProcessorsOrder();
         project.getTasks().withType(JavaCompile.class).configureEach(task -> {
             doBeforeTaskExecution(task, __ -> {
                 val compileOptions = task.getOptions();
@@ -171,7 +176,7 @@ public class LombokPlugin implements Plugin<Project> {
                     return;
                 }
 
-                if (!defaultTrue(lombokExtension.getFixAnnotationProcessorsOrder().getOrNull())) {
+                if (!defaultTrue(isEnabled.getOrNull())) {
                     return;
                 }
 
@@ -180,6 +185,7 @@ public class LombokPlugin implements Plugin<Project> {
                     return;
                 }
 
+                val project = task.getProject();
                 compileOptions.setAnnotationProcessorPath(project.files(project.provider(() -> {
                     Collection<File> files = annotationProcessorPath.getFiles();
                     files = withFixedAnnotationProcessorFilesOrder(files);
@@ -193,7 +199,7 @@ public class LombokPlugin implements Plugin<Project> {
                     return;
                 }
 
-                if (!defaultTrue(lombokExtension.getFixAnnotationProcessorsOrder().getOrNull())) {
+                if (!defaultTrue(isEnabled.getOrNull())) {
                     return;
                 }
 
@@ -229,7 +235,7 @@ public class LombokPlugin implements Plugin<Project> {
 
     private void configureCompileInputFiles() {
         project.getTasks().withType(JavaCompile.class).configureEach(task -> {
-            task.getInputs().files(project.provider(() ->
+            task.getInputs().files(task.getProject().provider(() ->
                 parseLombokConfigs(task).stream()
                     .map(LombokConfig::getInvolvedPaths)
                     .flatMap(Collection::stream)
@@ -240,23 +246,25 @@ public class LombokPlugin implements Plugin<Project> {
 
 
     private void configureConfigValidation() {
+        val tasks = project.getTasks();
+        val extensionDisabledRules = lombokExtension.getConfig().getValidate().getDisabledRules();
         project.getTasks().register(VALIDATE_LOMBOK_CONFIG_TASK_NAME, ValidateLombokConfig.class, task -> {
-            val javaCompileTasks = project.getTasks().withType(JavaCompile.class);
+            val javaCompileTasks = tasks.withType(JavaCompile.class);
             task.dependsOn(javaCompileTasks);
 
-            task.getDirectories().from(project.getLayout().getProjectDirectory());
-            task.getDirectories().from(project.provider(() ->
+            task.getDirectories().from(getProjectLayout().getProjectDirectory());
+            task.getDirectories().from(getProviders().provider(() ->
                 javaCompileTasks.stream()
                     .flatMap(LombokConfigUtils::streamJavaCompileSourceDirs)
                     .collect(toSet())
             ));
 
-            task.getDisabledRules().convention(lombokExtension.getConfig().getValidate().getDisabledRules());
+            task.getDisabledRules().convention(extensionDisabledRules);
         });
 
         project.getPluginManager().withPlugin("java", __ -> {
             project.getTasks().named(CHECK_TASK_NAME, task -> {
-                task.dependsOn(project.getTasks().withType(ValidateLombokConfig.class));
+                task.dependsOn(tasks.withType(ValidateLombokConfig.class));
             });
         });
     }
@@ -280,9 +288,10 @@ public class LombokPlugin implements Plugin<Project> {
                 return; // disabled by default
             }
 
+            val generate = lombokExtension.getConfig().getGenerate();
             project.getTasks().register(GENERATE_LOMBOK_CONFIG_TASK_NAME, GenerateLombokConfig.class, task -> {
-                task.getFile().convention(lombokExtension.getConfig().getGenerate().getFile());
-                task.getProperties().convention(lombokExtension.getConfig().getGenerate().getProperties());
+                task.getFile().convention(generate.getFile());
+                task.getProperties().convention(generate.getProperties());
             });
 
             project.getTasks().withType(JavaCompile.class).configureEach(task -> {
@@ -386,6 +395,12 @@ public class LombokPlugin implements Plugin<Project> {
             ));
         }
     }
+
+    @Inject
+    protected abstract ProviderFactory getProviders();
+
+    @Inject
+    protected abstract ProjectLayout getProjectLayout();
 
     //#endregion
 

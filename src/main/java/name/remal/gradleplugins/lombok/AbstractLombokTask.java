@@ -9,17 +9,21 @@ import com.google.errorprone.annotations.ForOverride;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.inject.Inject;
 import lombok.val;
 import name.remal.gradleplugins.toolkit.JavaInstallationMetadataUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.file.ProjectLayout;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.jvm.toolchain.JavaLauncher;
+import org.gradle.process.ExecOperations;
 import org.gradle.process.JavaExecSpec;
 
 public abstract class AbstractLombokTask extends DefaultTask {
@@ -62,7 +66,7 @@ public abstract class AbstractLombokTask extends DefaultTask {
     public void execute() {
         AtomicReference<JavaExecSpec> execSpecRef = new AtomicReference<>();
 
-        getProject().javaexec(execSpec -> {
+        getExecOperations().javaexec(execSpec -> {
             val javaLauncher = getJavaLauncher().get();
             val javaVersion = Optional.of(javaLauncher.getMetadata())
                 .map(JavaInstallationMetadataUtils::getJavaInstallationVersionOf)
@@ -84,5 +88,14 @@ public abstract class AbstractLombokTask extends DefaultTask {
 
         setDidWork(true);
     }
+
+    @Inject
+    protected abstract ExecOperations getExecOperations();
+
+    @Inject
+    protected abstract ProjectLayout getProjectLayout();
+
+    @Inject
+    protected abstract ObjectFactory getObjectFactory();
 
 }

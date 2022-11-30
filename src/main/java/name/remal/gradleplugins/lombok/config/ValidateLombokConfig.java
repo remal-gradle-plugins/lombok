@@ -6,6 +6,8 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.StreamSupport.stream;
 import static name.remal.gradleplugins.lombok.config.LombokConfigUtils.parseLombokConfigs;
+import static name.remal.gradleplugins.toolkit.ClosureUtils.configureWith;
+import static name.remal.gradleplugins.toolkit.LayoutUtils.getRootDirOf;
 import static name.remal.gradleplugins.toolkit.PredicateUtils.not;
 import static name.remal.gradleplugins.toolkit.ReportContainerUtils.createReportContainerFor;
 import static name.remal.gradleplugins.toolkit.issues.Issue.newIssueBuilder;
@@ -30,8 +32,8 @@ import name.remal.gradleplugins.toolkit.issues.Issue;
 import name.remal.gradleplugins.toolkit.issues.TextIssuesRenderer;
 import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
-import org.gradle.api.Project;
 import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.reporting.Reporting;
@@ -64,7 +66,7 @@ public abstract class ValidateLombokConfig
 
     @Override
     public ValidateLombokConfigReports reports(@DelegatesTo(strategy = DELEGATE_FIRST) Closure closure) {
-        getProject().configure(reports, closure);
+        configureWith(reports, closure);
         return reports;
     }
 
@@ -151,14 +153,25 @@ public abstract class ValidateLombokConfig
         }
     }
 
+
+    @Internal
+    protected abstract DirectoryProperty getRootDir();
+
+    {
+        val project = getProject();
+        getRootDir().set(project.getLayout().dir(project.provider(() ->
+            getRootDirOf(project)
+        )));
+    }
+
     @Getter
     private class Context implements LombokConfigValidationContext {
 
         private final Collection<Issue> issues = new LinkedHashSet<>();
 
         @Override
-        public Project getProject() {
-            return ValidateLombokConfig.this.getProject();
+        public Path getRootPath() {
+            return getRootDir().getAsFile().get().toPath();
         }
 
         @Override

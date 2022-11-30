@@ -25,10 +25,8 @@ abstract class BaseCreateLombokJar extends AbstractLombokTask {
     protected BaseCreateLombokJar(String command) {
         super(command);
 
-        val project = getProject();
-
         getOutputFile().convention(
-            project.getLayout().getBuildDirectory().file(getName() + '/' + getGeneratedFileName())
+            getProjectLayout().getBuildDirectory().file(getName() + '/' + getGeneratedFileName())
         );
     }
 

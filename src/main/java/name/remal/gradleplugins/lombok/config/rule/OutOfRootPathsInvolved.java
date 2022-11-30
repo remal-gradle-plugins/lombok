@@ -5,7 +5,6 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static name.remal.gradleplugins.lombok.config.LombokConfig.LOMBOK_CONFIG_FILE_NAME;
 import static name.remal.gradleplugins.lombok.config.rule.DocUtils.PLUGIN_REPOSITORY_HTML_URL;
-import static name.remal.gradleplugins.lombok.config.rule.Utils.getRootPathOf;
 import static name.remal.gradleplugins.toolkit.PredicateUtils.not;
 
 import com.google.auto.service.AutoService;
@@ -18,7 +17,7 @@ public class OutOfRootPathsInvolved implements LombokConfigRule {
 
     @Override
     public void validate(LombokConfig config, LombokConfigValidationContext context) {
-        val rootPath = getRootPathOf(context);
+        val rootPath = context.getRootPath();
 
         val outsideRootConfigs = config.getConfigFiles().stream()
             .filter(not(it -> it.getFile().getFileSystemPath().startsWith(rootPath)))

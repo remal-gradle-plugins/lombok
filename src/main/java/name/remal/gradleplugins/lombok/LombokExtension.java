@@ -29,12 +29,12 @@ public abstract class LombokExtension {
     }
 
 
-    public abstract Property<Boolean> getOpenJavacPackages();
+    public abstract Property<Boolean> getFixJavacReflectionsAccess();
 
     public abstract Property<Boolean> getFixAnnotationProcessorsOrder();
 
     {
-        getOpenJavacPackages().convention(true);
+        getFixJavacReflectionsAccess().convention(true);
         getFixAnnotationProcessorsOrder().convention(true);
     }
 

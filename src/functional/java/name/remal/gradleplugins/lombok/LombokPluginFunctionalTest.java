@@ -1,6 +1,7 @@
 package name.remal.gradleplugins.lombok;
 
 import static java.lang.String.join;
+import static name.remal.gradleplugins.toolkit.PathUtils.deleteRecursively;
 
 import lombok.RequiredArgsConstructor;
 import name.remal.gradleplugins.toolkit.testkit.functional.GradleProject;
@@ -69,6 +70,16 @@ class LombokPluginFunctionalTest {
                 + "'ConfigureUtilityClassUsage',"
                 + ")")
             .registerDefaultTask("validateLombokConfig");
+        project.assertBuildSuccessfully();
+    }
+
+    @Test
+    void generateConfig() {
+        deleteRecursively(project.getProjectDir().toPath().resolve("lombok.config"));
+
+        project.getBuildFile()
+            .append("lombok.config.generate { enabled = true; set('config.stopBubbling', true); }")
+            .registerDefaultTask("compileJava");
         project.assertBuildSuccessfully();
     }
 

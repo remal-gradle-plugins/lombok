@@ -49,7 +49,7 @@ public abstract class Delombok extends AbstractLombokTask {
 
     @Getter
     @Nested
-    private final DelombokFormat format = getProject().getObjects().newInstance(DelombokFormat.class);
+    private final DelombokFormat format = getObjectFactory().newInstance(DelombokFormat.class);
 
     public void format(Action<DelombokFormat> action) {
         action.execute(format);
