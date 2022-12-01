@@ -37,6 +37,8 @@ class LombokPluginFunctionalTest {
             "    String field;",
             "}"
         ));
+
+        project.withoutConfigurationCache();
     }
 
     @Test
