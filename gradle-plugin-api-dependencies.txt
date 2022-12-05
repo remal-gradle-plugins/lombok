@@ -1,7 +1,7 @@
 # This file is generated automatically by `collectAllGradlePluginApiDependencies` Gradle task.
 # Do not modify it yourself unless you know what you are doing.
 
+classes-that-rely-on-gradle-internal-api:2e1c33a9cbf5d2e240d02d8e36c0a4f8e72addf6afe7fcd0d1ffad0b08db289e
 org.ow2.asm:asm-bom:9.4:@pom
 org.projectlombok:lombok-mapstruct-binding:0.2.0
 org.projectlombok:lombok:1.18.24
-toolkit-classes-that-rely-on-internal-api:6aac701d7414b0526095248eec8ff496133af9550680bd58f6a17ae25b03f5cb
