@@ -17,6 +17,10 @@ import static name.remal.gradleplugins.toolkit.ObjectUtils.isEmpty;
 import static name.remal.gradleplugins.toolkit.ObjectUtils.isNotEmpty;
 import static name.remal.gradleplugins.toolkit.ProjectUtils.afterEvaluateOrNow;
 import static name.remal.gradleplugins.toolkit.TaskUtils.doBeforeTaskExecution;
+import static org.gradle.api.attributes.Category.CATEGORY_ATTRIBUTE;
+import static org.gradle.api.attributes.Category.LIBRARY;
+import static org.gradle.api.attributes.Usage.JAVA_RUNTIME;
+import static org.gradle.api.attributes.Usage.USAGE_ATTRIBUTE;
 import static org.gradle.api.plugins.JavaBasePlugin.CHECK_TASK_NAME;
 import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
 
@@ -45,6 +49,8 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.DependencyConstraint;
 import org.gradle.api.artifacts.ExternalModuleDependency;
+import org.gradle.api.attributes.Category;
+import org.gradle.api.attributes.Usage;
 import org.gradle.api.file.ProjectLayout;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.ProviderFactory;
@@ -82,6 +88,18 @@ public abstract class LombokPlugin implements Plugin<Project> {
                     lombokDependency,
                     lombokExtension.getLombokVersion().getOrNull()
                 ));
+            });
+
+            conf.setCanBeConsumed(false);
+            conf.attributes(attrs -> {
+                attrs.attribute(
+                    USAGE_ATTRIBUTE,
+                    project.getObjects().named(Usage.class, JAVA_RUNTIME)
+                );
+                attrs.attribute(
+                    CATEGORY_ATTRIBUTE,
+                    project.getObjects().named(Category.class, LIBRARY)
+                );
             });
         });
 
