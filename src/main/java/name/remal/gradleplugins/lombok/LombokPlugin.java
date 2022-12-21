@@ -22,6 +22,8 @@ import static org.gradle.api.attributes.Category.LIBRARY;
 import static org.gradle.api.attributes.Usage.JAVA_RUNTIME;
 import static org.gradle.api.attributes.Usage.USAGE_ATTRIBUTE;
 import static org.gradle.api.plugins.JavaBasePlugin.CHECK_TASK_NAME;
+import static org.gradle.api.plugins.JavaPlugin.ANNOTATION_PROCESSOR_CONFIGURATION_NAME;
+import static org.gradle.api.plugins.JavaPlugin.COMPILE_CLASSPATH_CONFIGURATION_NAME;
 import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
 
 import com.google.common.base.Joiner;
@@ -32,6 +34,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import lombok.CustomLog;
@@ -42,6 +45,7 @@ import name.remal.gradleplugins.lombok.config.LombokConfigUtils;
 import name.remal.gradleplugins.lombok.config.ValidateLombokConfig;
 import name.remal.gradleplugins.toolkit.JavaInstallationMetadataUtils;
 import name.remal.gradleplugins.toolkit.ObjectUtils;
+import name.remal.gradleplugins.toolkit.Version;
 import org.gradle.api.Action;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
@@ -49,6 +53,7 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.DependencyConstraint;
 import org.gradle.api.artifacts.ExternalModuleDependency;
+import org.gradle.api.attributes.AttributeContainer;
 import org.gradle.api.attributes.Category;
 import org.gradle.api.attributes.Usage;
 import org.gradle.api.file.ProjectLayout;
@@ -79,39 +84,20 @@ public abstract class LombokPlugin implements Plugin<Project> {
 
         this.lombokExtension = project.getExtensions().create(LOMBOK_EXTENSION_NAME, LombokExtension.class);
 
-        val lombokDependency = getLombokDependency("lombok");
         this.lombokConf = project.getConfigurations().create(LOMBOK_CONFIGURATION_NAME, conf -> {
             conf.setDescription("Lombok");
             conf.defaultDependencies(deps -> {
                 deps.add(createDependency(
-                    project,
-                    lombokDependency,
+                    getLombokDependency("lombok"),
                     lombokExtension.getLombokVersion().getOrNull()
                 ));
             });
 
             conf.setCanBeConsumed(false);
-            conf.attributes(attrs -> {
-                attrs.attribute(
-                    USAGE_ATTRIBUTE,
-                    project.getObjects().named(Usage.class, JAVA_RUNTIME)
-                );
-                attrs.attribute(
-                    CATEGORY_ATTRIBUTE,
-                    project.getObjects().named(Category.class, LIBRARY)
-                );
-            });
+            conf.attributes(javaRuntimeLibrary());
         });
 
-        lombokExtension.getLombokVersion().convention(project.provider(() ->
-            lombokConf.getAllDependencyConstraints().stream()
-                .filter(constraint -> lombokDependency.getGroup().equals(constraint.getGroup()))
-                .filter(constraint -> lombokDependency.getName().equals(constraint.getName()))
-                .map(DependencyConstraint::getVersion)
-                .filter(ObjectUtils::isNotEmpty)
-                .reduce((first, second) -> second)
-                .orElseGet(lombokDependency::getVersion)
-        ));
+        lombokExtension.getLombokVersion().convention(project.provider(this::getDefaultLombokVersion));
 
 
         configureLombokTasks();
@@ -125,6 +111,33 @@ public abstract class LombokPlugin implements Plugin<Project> {
             configureSourceSetConfigurations();
             configureDelombokForAllSourceSets();
         });
+    }
+
+
+    private String getDefaultLombokVersion() {
+        val lombokDependency = getLombokDependency("lombok");
+        return Stream.of(
+                lombokConf,
+                project.getPluginManager().hasPlugin("java")
+                    ? project.getConfigurations().findByName(ANNOTATION_PROCESSOR_CONFIGURATION_NAME)
+                    : null,
+                project.getPluginManager().hasPlugin("java")
+                    ? project.getConfigurations().findByName(COMPILE_CLASSPATH_CONFIGURATION_NAME)
+                    : null
+            )
+            .filter(Objects::nonNull)
+            .map(Configuration::getAllDependencyConstraints)
+            .map(constraints -> constraints.stream()
+                .filter(constraint -> lombokDependency.getGroup().equals(constraint.getGroup()))
+                .filter(constraint -> lombokDependency.getName().equals(constraint.getName()))
+                .map(DependencyConstraint::getVersion)
+                .filter(ObjectUtils::isNotEmpty)
+                .reduce((first, second) -> Version.parse(first).compareTo(Version.parse(second)) >= 0 ? first : second)
+                .orElse(null)
+            )
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElseGet(lombokDependency::getVersion);
     }
 
 
@@ -329,7 +342,6 @@ public abstract class LombokPlugin implements Plugin<Project> {
                 conf.extendsFrom(lombokConf);
 
                 conf.getDependencies().add(createDependency(
-                    project,
                     getLombokDependency("lombok-mapstruct-binding")
                 ));
             });
@@ -384,34 +396,51 @@ public abstract class LombokPlugin implements Plugin<Project> {
         project.getConfigurations().matching(it -> Objects.equals(it.getName(), name)).all(action);
     }
 
-    private static ExternalModuleDependency createDependency(Project project, LombokDependency lombokDependency) {
-        return (ExternalModuleDependency) project.getDependencies().create(format(
+    private ExternalModuleDependency createDependency(LombokDependency lombokDependency) {
+        val dep = (ExternalModuleDependency) project.getDependencies().create(format(
             "%s:%s:%s",
             lombokDependency.getGroup(),
             lombokDependency.getName(),
             lombokDependency.getVersion()
         ));
+        dep.attributes(javaRuntimeLibrary());
+        return dep;
     }
 
-    private static ExternalModuleDependency createDependency(
-        Project project,
+    private ExternalModuleDependency createDependency(
         LombokDependency lombokDependency,
         @Nullable String version
     ) {
+        final ExternalModuleDependency dep;
         if (isEmpty(version)) {
-            return (ExternalModuleDependency) project.getDependencies().create(format(
+            dep = (ExternalModuleDependency) project.getDependencies().create(format(
                 "%s:%s",
                 lombokDependency.getGroup(),
                 lombokDependency.getName()
             ));
         } else {
-            return (ExternalModuleDependency) project.getDependencies().create(format(
+            dep = (ExternalModuleDependency) project.getDependencies().create(format(
                 "%s:%s:%s",
                 lombokDependency.getGroup(),
                 lombokDependency.getName(),
                 version
             ));
         }
+        dep.attributes(javaRuntimeLibrary());
+        return dep;
+    }
+
+    private Action<AttributeContainer> javaRuntimeLibrary() {
+        return attrs -> {
+            attrs.attribute(
+                USAGE_ATTRIBUTE,
+                project.getObjects().named(Usage.class, JAVA_RUNTIME)
+            );
+            attrs.attribute(
+                CATEGORY_ATTRIBUTE,
+                project.getObjects().named(Category.class, LIBRARY)
+            );
+        };
     }
 
     @Inject
