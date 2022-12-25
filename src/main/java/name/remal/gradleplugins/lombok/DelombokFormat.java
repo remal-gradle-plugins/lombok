@@ -2,8 +2,8 @@ package name.remal.gradleplugins.lombok;
 
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
-import static name.remal.gradleplugins.toolkit.reflection.ReflectionUtils.getPropertyNameForGetter;
-import static name.remal.gradleplugins.toolkit.reflection.ReflectionUtils.isGetterOf;
+import static name.remal.gradle_plugins.toolkit.reflection.ReflectionUtils.getPropertyNameForGetter;
+import static name.remal.gradle_plugins.toolkit.reflection.ReflectionUtils.isGetterOf;
 
 import java.util.ArrayList;
 import java.util.List;

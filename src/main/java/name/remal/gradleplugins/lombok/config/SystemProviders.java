@@ -1,7 +1,7 @@
 package name.remal.gradleplugins.lombok.config;
 
 import static lombok.AccessLevel.PRIVATE;
-import static name.remal.gradleplugins.toolkit.ObjectUtils.isEmpty;
+import static name.remal.gradle_plugins.toolkit.ObjectUtils.isEmpty;
 
 import java.util.Map;
 import lombok.NoArgsConstructor;

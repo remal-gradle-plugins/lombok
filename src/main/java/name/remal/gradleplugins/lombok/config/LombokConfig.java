@@ -8,9 +8,9 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
+import static name.remal.gradle_plugins.toolkit.ObjectUtils.doNotInline;
+import static name.remal.gradle_plugins.toolkit.PathUtils.normalizePath;
 import static name.remal.gradleplugins.lombok.config.LombokConfigFileParser.parseLombokConfigFile;
-import static name.remal.gradleplugins.toolkit.ObjectUtils.doNotInline;
-import static name.remal.gradleplugins.toolkit.PathUtils.normalizePath;
 
 import java.io.File;
 import java.nio.file.Path;

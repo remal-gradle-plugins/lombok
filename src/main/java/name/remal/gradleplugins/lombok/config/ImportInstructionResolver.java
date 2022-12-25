@@ -1,10 +1,10 @@
 package name.remal.gradleplugins.lombok.config;
 
 import static lombok.AccessLevel.PRIVATE;
+import static name.remal.gradle_plugins.toolkit.PathUtils.normalizePath;
 import static name.remal.gradleplugins.lombok.config.LombokConfig.LOMBOK_CONFIG_FILE_NAME;
 import static name.remal.gradleplugins.lombok.config.SystemProviders.getEnvVars;
 import static name.remal.gradleplugins.lombok.config.SystemProviders.getHomeDirPath;
-import static name.remal.gradleplugins.toolkit.PathUtils.normalizePath;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;

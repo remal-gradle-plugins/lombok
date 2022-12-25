@@ -3,9 +3,9 @@ package name.remal.gradleplugins.lombok.config.rule;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static name.remal.gradle_plugins.toolkit.PredicateUtils.not;
 import static name.remal.gradleplugins.lombok.config.LombokConfig.LOMBOK_CONFIG_FILE_NAME;
 import static name.remal.gradleplugins.lombok.config.rule.DocUtils.PLUGIN_REPOSITORY_HTML_URL;
-import static name.remal.gradleplugins.toolkit.PredicateUtils.not;
 
 import com.google.auto.service.AutoService;
 import lombok.val;

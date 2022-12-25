@@ -5,7 +5,7 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.Comparator.comparing;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static lombok.AccessLevel.PRIVATE;
-import static name.remal.gradleplugins.toolkit.ObjectUtils.isEmpty;
+import static name.remal.gradle_plugins.toolkit.ObjectUtils.isEmpty;
 
 import java.io.File;
 import java.util.ArrayList;

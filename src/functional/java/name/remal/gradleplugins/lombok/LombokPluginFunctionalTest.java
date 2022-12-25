@@ -1,10 +1,10 @@
 package name.remal.gradleplugins.lombok;
 
 import static java.lang.String.join;
-import static name.remal.gradleplugins.toolkit.PathUtils.deleteRecursively;
+import static name.remal.gradle_plugins.toolkit.PathUtils.deleteRecursively;
 
 import lombok.RequiredArgsConstructor;
-import name.remal.gradleplugins.toolkit.testkit.functional.GradleProject;
+import name.remal.gradle_plugins.toolkit.testkit.functional.GradleProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

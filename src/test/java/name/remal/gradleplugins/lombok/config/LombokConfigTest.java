@@ -3,12 +3,12 @@ package name.remal.gradleplugins.lombok.config;
 import static com.google.common.jimfs.Configuration.unix;
 import static java.lang.String.join;
 import static java.nio.file.Files.writeString;
+import static name.remal.gradle_plugins.toolkit.PathUtils.createParentDirectories;
 import static name.remal.gradleplugins.lombok.config.LombokConfig.LOMBOK_CONFIG_FILE_NAME;
 import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.CLEAR;
 import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.MINUS;
 import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.PLUS;
 import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.SET;
-import static name.remal.gradleplugins.toolkit.PathUtils.createParentDirectories;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.jimfs.Jimfs;

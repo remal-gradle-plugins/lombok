@@ -1,8 +1,8 @@
 package name.remal.gradleplugins.lombok.config;
 
 import static java.util.Collections.singletonMap;
+import static name.remal.gradle_plugins.toolkit.PathUtils.normalizePath;
 import static name.remal.gradleplugins.lombok.config.LombokConfig.LOMBOK_CONFIG_FILE_NAME;
-import static name.remal.gradleplugins.toolkit.PathUtils.normalizePath;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.lenient;

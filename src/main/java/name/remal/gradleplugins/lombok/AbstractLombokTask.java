@@ -1,9 +1,9 @@
 package name.remal.gradleplugins.lombok;
 
 import static java.util.Collections.emptyList;
+import static name.remal.gradle_plugins.toolkit.JavaLauncherUtils.getJavaLauncherProviderFor;
 import static name.remal.gradleplugins.lombok.JavacPackagesToOpenUtils.getJavacPackageOpenJvmArgs;
 import static name.remal.gradleplugins.lombok.JavacPackagesToOpenUtils.shouldJavacPackageOpenJvmArgsBeAdded;
-import static name.remal.gradleplugins.toolkit.JavaLauncherUtils.getJavaLauncherProviderFor;
 
 import com.google.errorprone.annotations.ForOverride;
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.inject.Inject;
 import lombok.val;
-import name.remal.gradleplugins.toolkit.JavaInstallationMetadataUtils;
+import name.remal.gradle_plugins.toolkit.JavaInstallationMetadataUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.file.ConfigurableFileCollection;

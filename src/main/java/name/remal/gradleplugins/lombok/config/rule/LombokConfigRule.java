@@ -1,7 +1,7 @@
 package name.remal.gradleplugins.lombok.config.rule;
 
 import static java.util.Collections.emptySet;
-import static name.remal.gradleplugins.toolkit.reflection.ReflectionUtils.unwrapGeneratedSubclass;
+import static name.remal.gradle_plugins.toolkit.reflection.ReflectionUtils.unwrapGeneratedSubclass;
 
 import java.util.Set;
 import name.remal.gradleplugins.lombok.config.LombokConfig;

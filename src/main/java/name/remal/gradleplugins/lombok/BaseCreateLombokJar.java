@@ -3,7 +3,7 @@ package name.remal.gradleplugins.lombok;
 import static java.lang.String.format;
 import static java.nio.file.Files.move;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static name.remal.gradleplugins.toolkit.PathUtils.createParentDirectories;
+import static name.remal.gradle_plugins.toolkit.PathUtils.createParentDirectories;
 
 import com.google.errorprone.annotations.ForOverride;
 import java.io.File;

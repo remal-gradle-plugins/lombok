@@ -1,20 +1,20 @@
 package name.remal.gradleplugins.lombok.config;
 
 import static lombok.AccessLevel.PRIVATE;
+import static name.remal.gradle_plugins.toolkit.PathUtils.getPathLastModifiedIfExists;
+import static name.remal.gradle_plugins.toolkit.StringUtils.substringBefore;
 import static name.remal.gradleplugins.lombok.config.LombokConfigNormalizer.normalizeLombokConfigKey;
 import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.CLEAR;
 import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.MINUS;
 import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.PLUS;
 import static name.remal.gradleplugins.lombok.config.LombokConfigPropertyOperator.SET;
-import static name.remal.gradleplugins.toolkit.PathUtils.getPathLastModifiedIfExists;
-import static name.remal.gradleplugins.toolkit.StringUtils.substringBefore;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.util.regex.Pattern;
 import lombok.NoArgsConstructor;
 import lombok.val;
-import name.remal.gradleplugins.toolkit.cache.ToolkitCache;
-import name.remal.gradleplugins.toolkit.cache.ToolkitCacheBuilder;
+import name.remal.gradle_plugins.toolkit.cache.ToolkitCache;
+import name.remal.gradle_plugins.toolkit.cache.ToolkitCacheBuilder;
 
 /**
  * See
