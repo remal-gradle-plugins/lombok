@@ -1,7 +1,7 @@
 tasks.named('generateJava') { Task task ->
     inputs.files(configurations.lombokCoreArtifacts).withPropertyName('lombokCoreArtifacts')
     inputs.files(configurations.lombokAddonsArtifacts).withPropertyName('lombokAddonsArtifacts').optional()
-    classFile('name.remal.gradleplugins.lombok', 'LombokDependencyType') {
+    classFile(project.calculateBaseJavaPackage(), 'LombokDependencyType') {
         it.writePackage()
         it.println("")
         it.writeBlock("enum ${it.simpleName}") {
@@ -10,7 +10,7 @@ tasks.named('generateJava') { Task task ->
             it.println(";")
         }
     }
-    classFile('name.remal.gradleplugins.lombok', 'LombokDependency') {
+    classFile(project.calculateBaseJavaPackage(), 'LombokDependency') {
         it.writePackage()
         it.println("")
         it.writeImport("lombok.Builder")
@@ -25,7 +25,7 @@ tasks.named('generateJava') { Task task ->
             it.println("String version;")
         }
     }
-    classFile('name.remal.gradleplugins.lombok', 'LombokDependencies') {
+    classFile(project.calculateBaseJavaPackage(), 'LombokDependencies') {
         it.writePackage()
         it.println("")
         it.writeStaticImport("lombok.AccessLevel", "PRIVATE")

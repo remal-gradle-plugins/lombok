@@ -12,7 +12,7 @@ import com.github.javaparser.ast.visitor.GenericVisitorAdapter
 
 tasks.named('generateJava') { Task task ->
     inputs.files(configurations.lombokSources).withPropertyName('lombokSources')
-    classFile('name.remal.gradleplugins.lombok.config', 'LombokConfigurationKey') {
+    classFile("${project.calculateBaseJavaPackage()}.config", 'LombokConfigurationKey') {
         it.writePackage()
         it.println("")
         it.writeImport("lombok.Builder")
@@ -24,7 +24,7 @@ tasks.named('generateJava') { Task task ->
             it.println("String name;")
         }
     }
-    classFile('name.remal.gradleplugins.lombok.config', 'LombokConfigurationKeys') {
+    classFile("${project.calculateBaseJavaPackage()}.config", 'LombokConfigurationKeys') {
         it.writePackage()
         it.println("")
         it.writeStaticImport("lombok.AccessLevel", "PRIVATE")
