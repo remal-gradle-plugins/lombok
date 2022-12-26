@@ -111,4 +111,4 @@ This logic is executed whether MapStruct is used in the project or not.
 
 ## Version 1.* to 2.*
 
-Package name was changed from `name.remal.gradle_plugins.lombok` to `name.remal.gradleplugins.lombok`.
+* Package name was changed from `name.remal.gradleplugins.lombok` to `name.remal.gradle_plugins.lombok`.
