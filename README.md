@@ -106,3 +106,9 @@ lombok {
 The Lombok annotation processor is always put at the end of annotation processors. It is done to prevent [this MapStruct dependency ordering issue](https://github.com/mapstruct/mapstruct/issues/1581). The issue is marked as fixed, but it is still reproducible.
 
 This logic is executed whether MapStruct is used in the project or not.
+
+# Migration guide
+
+## Version 1.* to 2.*
+
+Package name was changed from `name.remal.gradle_plugins.lombok` to `name.remal.gradleplugins.lombok`.
