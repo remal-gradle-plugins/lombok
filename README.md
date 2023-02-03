@@ -4,7 +4,7 @@
 
 [![configuration cache: not supported](https://img.shields.io/static/v1?label=configuration%20cache&message=not%20supported&color=inactive)](https://docs.gradle.org/current/userguide/configuration_cache.html)
 
-This plugin adds [Lombok annotation processor](https://mvnrepository.com/artifact/org.projectlombok/lombok/1.18.24) to `compileOnly` and `annotationProcessor` configurations for every [`SourceSet`](https://docs.gradle.org/current/javadoc/org/gradle/api/tasks/SourceSet.html).
+This plugin adds [Lombok annotation processor](https://mvnrepository.com/artifact/org.projectlombok/lombok/1.18.26) to `compileOnly` and `annotationProcessor` configurations for every [`SourceSet`](https://docs.gradle.org/current/javadoc/org/gradle/api/tasks/SourceSet.html).
 
 This is done via creating `lombok` configuration and making `compileOnly` and `annotationProcessor` configurations extend it.
 
@@ -14,7 +14,7 @@ The plugin can be configured via `lombok` extension:
 
 ```groovy
 lombok {
-  lombokVersion = '1.18.24' // Lombok version
+  lombokVersion = '1.18.26' // Lombok version
 }
 ```
 
@@ -23,7 +23,7 @@ The used Lombok version can also be configured via constraints. This is useful f
 ```groovy
 dependencies {
   constraints {
-    lombok 'org.projectlombok:lombok:1.18.24'
+    lombok 'org.projectlombok:lombok:1.18.26'
   }
 }
 ```
