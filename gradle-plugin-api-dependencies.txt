@@ -2,6 +2,6 @@
 # Do not modify it yourself unless you know what you are doing.
 
 classes-that-rely-on-gradle-internal-api:12c927bac971e3cfec77b41f61ea597b0275cc1cdb1392b0813c9d000d39fb61
-org.ow2.asm:asm-bom:9.4:@pom
+org.ow2.asm:asm-bom:9.5:@pom
 org.projectlombok:lombok-mapstruct-binding:0.2.0
 org.projectlombok:lombok:1.18.26
