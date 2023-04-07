@@ -19,7 +19,7 @@ import static name.remal.gradle_plugins.toolkit.ProjectUtils.afterEvaluateOrNow;
 import static name.remal.gradle_plugins.toolkit.TaskUtils.doBeforeTaskExecution;
 import static org.gradle.api.attributes.Category.CATEGORY_ATTRIBUTE;
 import static org.gradle.api.attributes.Category.LIBRARY;
-import static org.gradle.api.attributes.Usage.JAVA_RUNTIME;
+import static org.gradle.api.attributes.Usage.JAVA_API;
 import static org.gradle.api.attributes.Usage.USAGE_ATTRIBUTE;
 import static org.gradle.api.plugins.JavaBasePlugin.CHECK_TASK_NAME;
 import static org.gradle.api.plugins.JavaPlugin.ANNOTATION_PROCESSOR_CONFIGURATION_NAME;
@@ -434,7 +434,7 @@ public abstract class LombokPlugin implements Plugin<Project> {
         return attrs -> {
             attrs.attribute(
                 USAGE_ATTRIBUTE,
-                project.getObjects().named(Usage.class, JAVA_RUNTIME)
+                project.getObjects().named(Usage.class, JAVA_API)
             );
             attrs.attribute(
                 CATEGORY_ATTRIBUTE,

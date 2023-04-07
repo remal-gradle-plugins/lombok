@@ -85,4 +85,13 @@ class LombokPluginFunctionalTest {
         project.assertBuildSuccessfully();
     }
 
+
+    @Test
+    void doesNotConflictWithTransitiveDependencies() {
+        project.getBuildFile()
+            .append("dependencies { implementation 'net.serenity-bdd:serenity-core:3.6.22' }")
+            .registerDefaultTask("compileJava");
+        project.assertBuildSuccessfully();
+    }
+
 }
