@@ -1,108 +1,96 @@
 package name.remal.gradle_plugins.lombok;
 
+import static java.util.Collections.reverse;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static name.remal.gradle_plugins.lombok.AnnotationProcessorsLombokOrderUtils.withFixedAnnotationProcessorFilesOrder;
 import static name.remal.gradle_plugins.lombok.AnnotationProcessorsLombokOrderUtils.withFixedAnnotationProcessorsOrder;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Objects;
 import java.util.stream.Stream;
 import lombok.val;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class AnnotationProcessorsLombokOrderUtilsTest {
 
-    @Nested
-    class FixAnnotationProcessorFilesOrder {
+    @ParameterizedTest
+    @MethodSource("fileOrderParams")
+    void fileOrder(String nameLess, String nameGreater) {
+        val expectedFiles = Stream.of(nameLess, nameGreater)
+            .map(name -> "/root/" + name)
+            .map(File::new)
+            .collect(toUnmodifiableList());
 
-        @Test
-        void noLombok() {
-            val files = Stream.of(
-                "/root/zz.jar",
-                "/root/aa.jar"
-            ).map(File::new).collect(toUnmodifiableList());
+        val fixedFiles = withFixedAnnotationProcessorFilesOrder(expectedFiles);
+        assertThat(fixedFiles).isEqualTo(expectedFiles);
 
-            val fixedFiles = withFixedAnnotationProcessorFilesOrder(files);
 
-            assertThat(fixedFiles).containsExactly(Stream.of(
-                "/root/zz.jar",
-                "/root/aa.jar"
-            ).map(File::new).toArray(File[]::new));
-        }
+        val reverseFiles = new ArrayList<>(expectedFiles);
+        reverse(reverseFiles);
 
-        @Test
-        void withLombok() {
-            val files = Stream.of(
-                "/root/lombok-1.jar",
-                "/root/zz.jar",
-                "/root/aa.jar"
-            ).map(File::new).collect(toUnmodifiableList());
+        val fixedReverseFiles = withFixedAnnotationProcessorFilesOrder(reverseFiles);
+        assertThat(fixedReverseFiles).isEqualTo(expectedFiles);
+    }
 
-            val fixedFiles = withFixedAnnotationProcessorFilesOrder(files);
+    private static Stream<Arguments> fileOrderParams() {
+        return Stream.of(
+            null,
+            arguments("mapstruct-processor-1.jar", "mapstruct-1.jar"),
+            arguments("mapstruct-processor-1.jar", "mapstruct"),
+            arguments("mapstruct-processor.jar", "mapstruct-1"),
+            arguments("mapstruct-processor.jar", "mapstruct.jar"),
 
-            assertThat(fixedFiles).containsExactly(Stream.of(
-                "/root/zz.jar",
-                "/root/aa.jar",
-                "/root/lombok-1.jar"
-            ).map(File::new).toArray(File[]::new));
-        }
+            arguments("mapstruct-1", "lombok-1.jar"),
+            arguments("mapstruct-1", "lombok.jar"),
+            arguments("mapstruct", "lombok-1.jar"),
+            arguments("mapstruct", "lombok.jar"),
 
-        @Test
-        void withLombokWithoutVersion() {
-            val files = Stream.of(
-                "/root/lombok.jar",
-                "/root/zz.jar",
-                "/root/aa.jar"
-            ).map(File::new).collect(toUnmodifiableList());
+            arguments("lombok-1.jar", "lombok-1"),
+            arguments("lombok-1.jar", "lombok"),
+            arguments("lombok.jar", "lombok-1"),
+            arguments("lombok.jar", "lombok"),
 
-            val fixedFiles = withFixedAnnotationProcessorFilesOrder(files);
-
-            assertThat(fixedFiles).containsExactly(Stream.of(
-                "/root/zz.jar",
-                "/root/aa.jar",
-                "/root/lombok.jar"
-            ).map(File::new).toArray(File[]::new));
-        }
-
+            arguments("lombok-1", "unknown"),
+            arguments("lombok", "unknown"),
+            null
+        ).filter(Objects::nonNull);
     }
 
 
-    @Nested
-    class FixAnnotationProcessorsOrder {
+    @ParameterizedTest
+    @MethodSource("processorOrderParams")
+    void processorOrder(String processorLess, String processorGreater) {
+        val expectedProcessors = Stream.of(processorLess, processorGreater)
+            .collect(toUnmodifiableList());
 
-        @Test
-        void noLombok() {
-            val processors = Stream.of(
-                "some.package.Z",
-                "some.package.A"
-            ).collect(toUnmodifiableList());
+        val fixedProcessors = withFixedAnnotationProcessorsOrder(expectedProcessors);
+        assertThat(fixedProcessors).isEqualTo(expectedProcessors);
 
-            val fixedProcessors = withFixedAnnotationProcessorsOrder(processors);
 
-            assertThat(fixedProcessors).containsExactly(Stream.of(
-                "some.package.Z",
-                "some.package.A"
-            ).toArray(String[]::new));
-        }
+        val reverseProcessors = new ArrayList<>(expectedProcessors);
+        reverse(reverseProcessors);
 
-        @Test
-        void withLombok() {
-            val processors = Stream.of(
-                "lombok.Processor",
-                "some.package.Z",
-                "some.package.A"
-            ).collect(toUnmodifiableList());
+        val fixedReverseProcessors = withFixedAnnotationProcessorsOrder(reverseProcessors);
+        assertThat(fixedReverseProcessors).isEqualTo(expectedProcessors);
+    }
 
-            val fixedProcessors = withFixedAnnotationProcessorsOrder(processors);
+    private static Stream<Arguments> processorOrderParams() {
+        return Stream.of(
+            null,
+            arguments("org.mapstruct.something", "com.something.mapstruct.something"),
 
-            assertThat(fixedProcessors).containsExactly(Stream.of(
-                "some.package.Z",
-                "some.package.A",
-                "lombok.Processor"
-            ).toArray(String[]::new));
-        }
+            arguments("com.something.mapstruct.something", "lombok.something"),
 
+            arguments("lombok.something", "something.lombok.something"),
+
+            arguments("something.lombok.something", "unknown"),
+            null
+        ).filter(Objects::nonNull);
     }
 
 }

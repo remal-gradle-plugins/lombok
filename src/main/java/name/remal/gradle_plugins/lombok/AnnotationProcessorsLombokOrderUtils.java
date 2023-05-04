@@ -3,14 +3,15 @@ package name.remal.gradle_plugins.lombok;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Comparator.comparing;
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static lombok.AccessLevel.PRIVATE;
 import static name.remal.gradle_plugins.toolkit.ObjectUtils.isEmpty;
 
+import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import lombok.NoArgsConstructor;
@@ -19,11 +20,19 @@ import lombok.val;
 @NoArgsConstructor(access = PRIVATE)
 abstract class AnnotationProcessorsLombokOrderUtils {
 
-    private static final Pattern LOMBOK_FILE_NAME = Pattern.compile("lombok(-\\d+.*)?\\.jar");
-    private static final Pattern LOMBOK_RELATED_FILE_NAME = Pattern.compile(".*\\blombok\\b.*", CASE_INSENSITIVE);
+    private static final Map<Pattern, Integer> FILE_NAME_ORDERS = ImmutableMap.<Pattern, Integer>builder()
+        .put(Pattern.compile("mapstruct-processor(-\\d+.*)?\\.jar"), -100)
+        .put(Pattern.compile(".*\\bmapstruct\\b.*"), -99)
+        .put(Pattern.compile("lombok(-\\d+.*)?\\.jar"), 0)
+        .put(Pattern.compile(".*\\blombok\\b.*"), 1)
+        .build();
 
-    private static final Pattern LOMBOK_PROCESSOR = Pattern.compile("lombok\\..*");
-    private static final Pattern LOMBOK_RELATED_PROCESSOR = Pattern.compile(".*\\blombok\\b.*", CASE_INSENSITIVE);
+    private static final Map<Pattern, Integer> PROCESSOR_ORDERS = ImmutableMap.<Pattern, Integer>builder()
+        .put(Pattern.compile("org\\.mapstruct\\..+"), -100)
+        .put(Pattern.compile(".*\\bmapstruct\\b.*"), -99)
+        .put(Pattern.compile("lombok\\..+"), 0)
+        .put(Pattern.compile(".*\\blombok\\b.*"), 1)
+        .build();
 
 
     public static List<File> withFixedAnnotationProcessorFilesOrder(@Nullable Collection<File> files) {
@@ -39,15 +48,13 @@ abstract class AnnotationProcessorsLombokOrderUtils {
     private static int getFileOrder(File file) {
         val fileName = file.getName();
 
-        if (LOMBOK_FILE_NAME.matcher(fileName).matches()) {
-            return 100;
+        for (val entry : FILE_NAME_ORDERS.entrySet()) {
+            if (entry.getKey().matcher(fileName).matches()) {
+                return entry.getValue();
+            }
         }
 
-        if (LOMBOK_RELATED_FILE_NAME.matcher(fileName).matches()) {
-            return 10;
-        }
-
-        return 0;
+        return Integer.MAX_VALUE;
     }
 
 
@@ -62,15 +69,13 @@ abstract class AnnotationProcessorsLombokOrderUtils {
     }
 
     private static int getProcessorOrder(String processor) {
-        if (LOMBOK_PROCESSOR.matcher(processor).matches()) {
-            return 100;
+        for (val entry : PROCESSOR_ORDERS.entrySet()) {
+            if (entry.getKey().matcher(processor).matches()) {
+                return entry.getValue();
+            }
         }
 
-        if (LOMBOK_RELATED_PROCESSOR.matcher(processor).matches()) {
-            return 10;
-        }
-
-        return 0;
+        return Integer.MAX_VALUE;
     }
 
 }

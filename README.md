@@ -103,9 +103,23 @@ lombok {
 
 [`lombok-mapstruct-binding`](https://mvnrepository.com/artifact/org.projectlombok/lombok-mapstruct-binding/0.2.0) dependency is added to `annotationProcessor` configuration for every [`SourceSet`](https://docs.gradle.org/current/javadoc/org/gradle/api/tasks/SourceSet.html).
 
-The Lombok annotation processor is always put at the end of annotation processors. It is done to prevent [this MapStruct dependency ordering issue](https://github.com/mapstruct/mapstruct/issues/1581). The issue is marked as fixed, but it is still reproducible.
+The MapStruct annotation processor is always put before the Lombok annotation processor. It is done to prevent [this MapStruct dependency ordering issue](https://github.com/mapstruct/mapstruct/issues/1581). The issue is marked as fixed, but it is still reproducible.
 
 This logic is executed whether MapStruct is used in the project or not.
+
+## Micronaut compatibility
+
+The Lombok annotation processor should always be before the Micronaut annotation processor to prevent issues like [this](https://github.com/micronaut-projects/micronaut-core/issues/218). This plugin automatically applies a fix described [here](https://github.com/micronaut-projects/micronaut-core/issues/218#issuecomment-397584046).
+
+## Compatibility with other annotation processors
+
+By default, the Lombok annotation processor is always put before any other annotation processors.
+
+Exceptions:
+
+* MapStruct - Lombok is always put after
+
+If there is a compatibility issue and the Lombok annotation processor has to be after some processor (like MapStruct), please report it.
 
 # Migration guide
 
