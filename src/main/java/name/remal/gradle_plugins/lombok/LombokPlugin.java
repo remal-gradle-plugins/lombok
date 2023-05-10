@@ -97,7 +97,7 @@ public abstract class LombokPlugin implements Plugin<Project> {
             conf.attributes(javaRuntimeLibrary());
         });
 
-        lombokExtension.getLombokVersion().convention(project.provider(this::getDefaultLombokVersion));
+        lombokExtension.getLombokVersion().convention(getProviders().provider(this::getDefaultLombokVersion));
 
 
         configureLombokTasks();
@@ -200,6 +200,8 @@ public abstract class LombokPlugin implements Plugin<Project> {
     @SuppressWarnings({"UnstableApiUsage", "java:S3776"})
     private void configureAnnotationProcessorsOrder() {
         val isEnabled = lombokExtension.getFixAnnotationProcessorsOrder();
+        val layout = getLayout();
+        val providers = getProviders();
         project.getTasks().withType(JavaCompile.class).configureEach(task -> {
             doBeforeTaskExecution(task, __ -> {
                 val compileOptions = task.getOptions();
@@ -216,8 +218,7 @@ public abstract class LombokPlugin implements Plugin<Project> {
                     return;
                 }
 
-                val project = task.getProject();
-                compileOptions.setAnnotationProcessorPath(project.files(project.provider(() -> {
+                compileOptions.setAnnotationProcessorPath(layout.files(providers.provider(() -> {
                     Collection<File> files = annotationProcessorPath.getFiles();
                     files = withFixedAnnotationProcessorFilesOrder(files);
                     return files;
@@ -266,7 +267,7 @@ public abstract class LombokPlugin implements Plugin<Project> {
 
     private void configureCompileInputFiles() {
         project.getTasks().withType(JavaCompile.class).configureEach(task -> {
-            task.getInputs().files(task.getProject().provider(() ->
+            task.getInputs().files(getProviders().provider(() ->
                 parseLombokConfigs(task).stream()
                     .map(LombokConfig::getInvolvedPaths)
                     .flatMap(Collection::stream)
@@ -279,11 +280,11 @@ public abstract class LombokPlugin implements Plugin<Project> {
     private void configureConfigValidation() {
         val tasks = project.getTasks();
         val extensionDisabledRules = lombokExtension.getConfig().getValidate().getDisabledRules();
-        project.getTasks().register(VALIDATE_LOMBOK_CONFIG_TASK_NAME, ValidateLombokConfig.class, task -> {
+        tasks.register(VALIDATE_LOMBOK_CONFIG_TASK_NAME, ValidateLombokConfig.class, task -> {
             val javaCompileTasks = tasks.withType(JavaCompile.class);
             task.dependsOn(javaCompileTasks);
 
-            task.getDirectories().from(getProjectLayout().getProjectDirectory());
+            task.getDirectories().from(getLayout().getProjectDirectory());
             task.getDirectories().from(getProviders().provider(() ->
                 javaCompileTasks.stream()
                     .flatMap(LombokConfigUtils::streamJavaCompileSourceDirs)
@@ -294,7 +295,7 @@ public abstract class LombokPlugin implements Plugin<Project> {
         });
 
         project.getPluginManager().withPlugin("java", __ -> {
-            project.getTasks().named(CHECK_TASK_NAME, task -> {
+            tasks.named(CHECK_TASK_NAME, task -> {
                 task.dependsOn(tasks.withType(ValidateLombokConfig.class));
             });
         });
@@ -361,16 +362,16 @@ public abstract class LombokPlugin implements Plugin<Project> {
                 );
                 delombok.dependsOn(javaCompileProvider);
 
-                delombok.getEncoding().set(project.provider(() ->
+                delombok.getEncoding().set(getProviders().provider(() ->
                     javaCompileProvider.get().getOptions().getEncoding()
                 ));
 
-                delombok.getClasspath().setFrom(project.provider(() ->
+                delombok.getClasspath().setFrom(getProviders().provider(() ->
                     javaCompileProvider.get().getClasspath()
                 ));
 
                 delombok.getInputFiles().setFrom(sourceSet.getAllJava().getSourceDirectories());
-                delombok.getInputFiles().from(project.provider(() ->
+                delombok.getInputFiles().from(getProviders().provider(() ->
                     javaCompileProvider.get().getOptions().getGeneratedSourceOutputDirectory()
                 ));
             });
@@ -447,7 +448,7 @@ public abstract class LombokPlugin implements Plugin<Project> {
     protected abstract ProviderFactory getProviders();
 
     @Inject
-    protected abstract ProjectLayout getProjectLayout();
+    protected abstract ProjectLayout getLayout();
 
     //#endregion
 

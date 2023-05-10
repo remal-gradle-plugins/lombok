@@ -56,8 +56,6 @@ class LombokPluginFunctionalTest {
             "    private String field;",
             "}"
         ));
-
-        project.withoutConfigurationCache();
     }
 
     private Path getGeneratedFile(String relativePath) {
