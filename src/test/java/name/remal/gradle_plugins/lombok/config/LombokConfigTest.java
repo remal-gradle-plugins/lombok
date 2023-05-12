@@ -2,7 +2,8 @@ package name.remal.gradle_plugins.lombok.config;
 
 import static com.google.common.jimfs.Configuration.unix;
 import static java.lang.String.join;
-import static java.nio.file.Files.writeString;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.Files.write;
 import static name.remal.gradle_plugins.lombok.config.LombokConfig.LOMBOK_CONFIG_FILE_NAME;
 import static name.remal.gradle_plugins.lombok.config.LombokConfigPropertyOperator.CLEAR;
 import static name.remal.gradle_plugins.lombok.config.LombokConfigPropertyOperator.MINUS;
@@ -39,20 +40,20 @@ class LombokConfigTest {
 
     @Test
     void simpleStopBubbling() throws Throwable {
-        writeString(configA, join(
+        write(configA, join(
             "\n",
             ""
-        ));
+        ).getBytes(UTF_8));
 
-        writeString(configAb, join(
+        write(configAb, join(
             "\n",
             "config.stopBubbling = true"
-        ));
+        ).getBytes(UTF_8));
 
-        writeString(configAbc, join(
+        write(configAbc, join(
             "\n",
             "config.stopBubbling = false"
-        ));
+        ).getBytes(UTF_8));
 
         val lombokConfig = new LombokConfig(configAbc);
         assertThat(lombokConfig.getInvolvedPaths())
@@ -65,27 +66,27 @@ class LombokConfigTest {
 
     @Test
     void simpleImport() throws Throwable {
-        writeString(configA, join(
+        write(configA, join(
             "\n",
             "import " + configX,
             "import " + configY,
             "import " + configZ
-        ));
+        ).getBytes(UTF_8));
 
-        writeString(configX, join(
+        write(configX, join(
             "\n",
             ""
-        ));
+        ).getBytes(UTF_8));
 
-        writeString(configY, join(
+        write(configY, join(
             "\n",
             ""
-        ));
+        ).getBytes(UTF_8));
 
-        writeString(configZ, join(
+        write(configZ, join(
             "\n",
             ""
-        ));
+        ).getBytes(UTF_8));
 
         val lombokConfig = new LombokConfig(configA);
         assertThat(lombokConfig.getInvolvedPaths())
@@ -100,31 +101,31 @@ class LombokConfigTest {
 
     @Test
     void importStopBubbling() throws Throwable {
-        writeString(configA, join(
+        write(configA, join(
             "\n",
             ""
-        ));
+        ).getBytes(UTF_8));
 
-        writeString(configAb, join(
+        write(configAb, join(
             "\n",
             "import " + configY,
             "import " + configZ
-        ));
+        ).getBytes(UTF_8));
 
-        writeString(configAbc, join(
+        write(configAbc, join(
             "\n",
             ""
-        ));
+        ).getBytes(UTF_8));
 
-        writeString(configY, join(
+        write(configY, join(
             "\n",
             "config.stopBubbling = true"
-        ));
+        ).getBytes(UTF_8));
 
-        writeString(configZ, join(
+        write(configZ, join(
             "\n",
             ""
-        ));
+        ).getBytes(UTF_8));
 
         val lombokConfig = new LombokConfig(configAbc);
         assertThat(lombokConfig.getInvolvedPaths())
@@ -140,26 +141,26 @@ class LombokConfigTest {
 
     @Test
     void get() throws Throwable {
-        writeString(configA, join(
+        write(configA, join(
             "\n",
             "prop.a = a",
             "prop.a.b = a",
             "prop.a.b.c = a"
-        ));
+        ).getBytes(UTF_8));
 
-        writeString(configAb, join(
+        write(configAb, join(
             "\n",
             "config.stopBubbling = true",
             "prop.a.b = ab",
             "prop.a.b.c = ab",
             "prop.x = x",
             "prop.x = xxx"
-        ));
+        ).getBytes(UTF_8));
 
-        writeString(configAbc, join(
+        write(configAbc, join(
             "\n",
             "prop.a.b.c = abc"
-        ));
+        ).getBytes(UTF_8));
 
         val lombokConfig = new LombokConfig(configAbc);
         assertThat(lombokConfig.get("prop.a"))
@@ -181,20 +182,20 @@ class LombokConfigTest {
 
     @Test
     void getList() throws Throwable {
-        writeString(configA, join(
+        write(configA, join(
             "\n",
             "list += a"
-        ));
+        ).getBytes(UTF_8));
 
-        writeString(configAb, join(
+        write(configAb, join(
             "\n",
             "config.stopBubbling = true",
             "list += ab",
             "list += ba",
             "list -= ba"
-        ));
+        ).getBytes(UTF_8));
 
-        writeString(configAbc, join(
+        write(configAbc, join(
             "\n",
             "list += xxx",
             "clear list",
@@ -202,7 +203,7 @@ class LombokConfigTest {
             "list -= cba",
             "list += cba",
             "list -= cba"
-        ));
+        ).getBytes(UTF_8));
 
         val lombokConfig = new LombokConfig(configAbc);
         assertThat(lombokConfig.getList("list"))
@@ -214,17 +215,17 @@ class LombokConfigTest {
 
     @Test
     void clear() throws Throwable {
-        writeString(configA, join(
+        write(configA, join(
             "\n",
             "list += a",
             "prop += a"
-        ));
+        ).getBytes(UTF_8));
 
-        writeString(configAb, join(
+        write(configAb, join(
             "\n",
             "clear list",
             "clear prop"
-        ));
+        ).getBytes(UTF_8));
 
         val lombokConfig = new LombokConfig(configAbc);
         assertThat(lombokConfig.getList("list"))
@@ -237,27 +238,27 @@ class LombokConfigTest {
 
     @Test
     void getAllProperties() throws Throwable {
-        writeString(configA, join(
+        write(configA, join(
             "\n",
             "prop = a",
             "list += a"
-        ));
+        ).getBytes(UTF_8));
 
-        writeString(configAb, join(
+        write(configAb, join(
             "\n",
             "config.stopBubbling = true",
             "prop = b",
             "list += ab",
             "list += ba",
             "list -= ba"
-        ));
+        ).getBytes(UTF_8));
 
-        writeString(configAbc, join(
+        write(configAbc, join(
             "\n",
             "prop = c",
             "clear list",
             "list += abc"
-        ));
+        ).getBytes(UTF_8));
 
         val lombokConfig = new LombokConfig(configAbc);
         assertThat(lombokConfig.getProperties())

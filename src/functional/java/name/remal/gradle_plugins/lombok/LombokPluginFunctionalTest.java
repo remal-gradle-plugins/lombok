@@ -2,9 +2,10 @@ package name.remal.gradle_plugins.lombok;
 
 import static java.lang.String.format;
 import static java.lang.String.join;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isRegularFile;
-import static java.nio.file.Files.readString;
+import static java.nio.file.Files.readAllBytes;
 import static name.remal.gradle_plugins.lombok.LibrariesToTestCompatibility.getLibraryNotation;
 import static name.remal.gradle_plugins.toolkit.PathUtils.deleteRecursively;
 import static name.remal.gradle_plugins.toolkit.StringUtils.escapeGroovy;
@@ -176,7 +177,8 @@ class LombokPluginFunctionalTest {
 
             project.assertBuildSuccessfully();
 
-            val content = readString(getGeneratedFile(APT_GENERATED_FOLDER + "/pkg/TestClassMapperImpl.java"));
+            val contentBytes = readAllBytes(getGeneratedFile(APT_GENERATED_FOLDER + "/pkg/TestClassMapperImpl.java"));
+            val content = new String(contentBytes, UTF_8);
             assertThat(content).contains("TestClassWithBuilder.builder()");
         }
 

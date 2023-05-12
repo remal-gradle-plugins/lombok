@@ -1,7 +1,7 @@
 package name.remal.gradle_plugins.lombok;
 
 import static java.util.Collections.reverse;
-import static java.util.stream.Collectors.toUnmodifiableList;
+import static java.util.stream.Collectors.toList;
 import static name.remal.gradle_plugins.lombok.AnnotationProcessorsLombokOrderUtils.withFixedAnnotationProcessorFilesOrder;
 import static name.remal.gradle_plugins.lombok.AnnotationProcessorsLombokOrderUtils.withFixedAnnotationProcessorsOrder;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +24,7 @@ class AnnotationProcessorsLombokOrderUtilsTest {
         val expectedFiles = Stream.of(nameLess, nameGreater)
             .map(name -> "/root/" + name)
             .map(File::new)
-            .collect(toUnmodifiableList());
+            .collect(toList());
 
         val fixedFiles = withFixedAnnotationProcessorFilesOrder(expectedFiles);
         assertThat(fixedFiles).isEqualTo(expectedFiles);
@@ -66,7 +66,7 @@ class AnnotationProcessorsLombokOrderUtilsTest {
     @MethodSource("processorOrderParams")
     void processorOrder(String processorLess, String processorGreater) {
         val expectedProcessors = Stream.of(processorLess, processorGreater)
-            .collect(toUnmodifiableList());
+            .collect(toList());
 
         val fixedProcessors = withFixedAnnotationProcessorsOrder(expectedProcessors);
         assertThat(fixedProcessors).isEqualTo(expectedProcessors);
