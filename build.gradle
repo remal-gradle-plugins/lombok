@@ -115,8 +115,8 @@ createLombokArtifactsConfiguration('librariesToTestCompatibility', false)
 dependencies {
     librariesToTestCompatibility 'org.mapstruct:mapstruct:1.5.5.Final'
     librariesToTestCompatibility 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-    librariesToTestCompatibility 'io.micronaut:micronaut-inject-java:3.9.1'
-    librariesToTestCompatibility 'io.micronaut:micronaut-validation:3.9.1'
+    librariesToTestCompatibility 'io.micronaut:micronaut-inject-java:3.9.2'
+    librariesToTestCompatibility 'io.micronaut:micronaut-validation:3.9.2'
 }
 
 apply from: 'build-generate-LibrariesToTestCompatibility.gradle'
