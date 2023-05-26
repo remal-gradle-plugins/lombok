@@ -1,9 +1,12 @@
+import static com.github.javaparser.ast.Modifier.finalModifier
+import static com.github.javaparser.ast.Modifier.publicModifier
+import static com.github.javaparser.ast.Modifier.staticModifier
+
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ParseProblemException
 import com.github.javaparser.ParseResult
 import com.github.javaparser.ParserConfiguration
 import com.github.javaparser.ast.CompilationUnit
-import com.github.javaparser.ast.Modifier
 import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.body.VariableDeclarator
 import com.github.javaparser.ast.expr.Expression
@@ -16,12 +19,15 @@ tasks.named('generateJava') { Task task ->
         it.writePackage()
         it.println("")
         it.writeImport("lombok.Builder")
+        it.writeImport("lombok.NonNull")
         it.writeImport("lombok.Value")
         it.println("")
         it.println("@Value")
         it.println("@Builder")
-        it.writeBlock("class ${it.simpleName}") {
-            it.println("String name;")
+        it.writeBlock("public class ${it.simpleName}") {
+            it.println("@NonNull String name;")
+            it.println("@NonNull String description;")
+            it.println("boolean deprecated;")
         }
     }
     classFile("${project.calculateBaseJavaPackage()}.config", 'LombokConfigurationKeys') {
@@ -36,7 +42,8 @@ tasks.named('generateJava') { Task task ->
         it.writeImport("lombok.val")
         it.println("")
         it.println("@NoArgsConstructor(access = PRIVATE)")
-        it.writeBlock("abstract class ${it.simpleName}") {
+        it.writeSuppressWarnings("checkstyle:LineLength", "checkstyle:RightCurlyAlone")
+        it.writeBlock("public abstract class ${it.simpleName}") {
             it.println("")
             it.println("private static final List<LombokConfigurationKey> KEYS = ImmutableList.<LombokConfigurationKey>builder()")
 
@@ -54,7 +61,7 @@ tasks.named('generateJava') { Task task ->
                 if (fileVisitDetails.isDirectory()) return
 
                 ParserConfiguration parserConfiguration = new ParserConfiguration()
-                parserConfiguration.languageLevel = ParserConfiguration.LanguageLevel.BLEEDING_EDGE
+                parserConfiguration.languageLevel = ParserConfiguration.LanguageLevel.RAW
 
                 JavaParser javaParser = new JavaParser(parserConfiguration)
                 ParseResult<CompilationUnit> parseResult = javaParser.parse(fileVisitDetails.open())
@@ -64,9 +71,7 @@ tasks.named('generateJava') { Task task ->
                 compilationUnit.accept(
                     new GenericVisitorAdapter() {
                         Object visit(FieldDeclaration field, Object arg) {
-                            if (!field.getModifiers().contains(Modifier.publicModifier())) return super.visit(field, arg)
-                            if (!field.getModifiers().contains(Modifier.staticModifier())) return super.visit(field, arg)
-                            if (!field.getModifiers().contains(Modifier.finalModifier())) return super.visit(field, arg)
+                            if (![publicModifier(), staticModifier(), finalModifier()].every { field.getModifiers().contains(it) }) return super.visit(field, arg)
 
                             VariableDeclarator variable = field.getVariable(0)
                             if (variable.type.asClassOrInterfaceType().name.asString() != 'ConfigurationKey') return super.visit(field, arg)
@@ -78,8 +83,14 @@ tasks.named('generateJava') { Task task ->
                             String configKey = initializer.getArgument(0).asStringLiteralExpr().value
                             if (!foundLombokConfigProperties.add(configKey.toLowerCase())) throw new GradleException("Dublicate Lombok config key: $configKey")
 
+                            boolean isDeprecated = field.annotations.any { it.name.identifier == 'Deprecated' }
+
                             it.println("    .add(LombokConfigurationKey.builder()")
                             it.println("        .name(\"${it.escapeJava(configKey)}\")")
+                            it.println("        .description(${initializer.getArgument(1)})")
+                            if (isDeprecated) {
+                                it.println("        .deprecated(true)")
+                            }
                             it.println("        .build()")
                             it.println("    )")
 
@@ -110,6 +121,11 @@ tasks.named('generateJava') { Task task ->
                     }
                 }
                 it.println("return null;")
+            }
+
+            it.println("")
+            it.writeBlock("public static List<LombokConfigurationKey> getAllLombokConfigurationKeys()") {
+                it.println("return KEYS;")
             }
         }
     }

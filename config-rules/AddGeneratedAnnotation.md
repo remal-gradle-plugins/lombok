@@ -8,6 +8,6 @@ To enable this functionality, set one of these properties to `true`:
 * `lombok.addJavaxGeneratedAnnotation`
 * `lombok.addGeneratedAnnotation` (deprecated)
 
-If you want to disable this functionality intentionally, set any of properties listed earlier to `false`.
+If you want to disable this functionality intentionally, set any of the properties listed earlier to `false`.
 
 See [https://projectlombok.org/features/configuration](https://projectlombok.org/features/configuration).
