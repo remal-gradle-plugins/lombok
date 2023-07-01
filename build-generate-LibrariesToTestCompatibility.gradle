@@ -1,4 +1,4 @@
-tasks.named('generateFunctionalJava') { Task task ->
+tasks.named('generateFunctionalTestJava') { Task task ->
     inputs.files(configurations.librariesToTestCompatibility).withPropertyName('librariesToTestCompatibility')
     classFile(project.calculateBaseJavaPackage(), 'LibrariesToTestCompatibility') {
         it.writePackage()
