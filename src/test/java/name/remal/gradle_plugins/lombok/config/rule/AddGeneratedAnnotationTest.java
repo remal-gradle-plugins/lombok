@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 class AddGeneratedAnnotationTest {
 
     @Test
+    @SuppressWarnings("java:S3415")
     void allConfigKeysSupported() {
         val addGeneratedAnnotationCurrentConfigKeys = getAllLombokConfigurationKeys().stream()
             .map(LombokConfigurationKey::getName)
