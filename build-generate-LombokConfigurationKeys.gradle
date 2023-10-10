@@ -81,7 +81,7 @@ tasks.named('generateJava') { Task task ->
                             ObjectCreationExpr initializer = (ObjectCreationExpr) untypedInitializer
 
                             String configKey = initializer.getArgument(0).asStringLiteralExpr().value
-                            if (!foundLombokConfigProperties.add(configKey.toLowerCase())) throw new GradleException("Dublicate Lombok config key: $configKey")
+                            if (!foundLombokConfigProperties.add(configKey.toLowerCase())) throw new GradleException("Duplicate Lombok config key: $configKey")
 
                             boolean isDeprecated = field.annotations.any { it.name.identifier == 'Deprecated' }
 
