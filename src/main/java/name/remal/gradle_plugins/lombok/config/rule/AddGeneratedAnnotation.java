@@ -17,6 +17,7 @@ public class AddGeneratedAnnotation implements LombokConfigRule {
     @VisibleForTesting
     static final List<String> ADD_GENERATED_ANNOTATION_CONFIG_KEYS = ImmutableList.of(
         "lombok.addLombokGeneratedAnnotation",
+        "lombok.addJakartaGeneratedAnnotation",
         "lombok.addJavaxGeneratedAnnotation",
         "lombok.addGeneratedAnnotation"
     );
