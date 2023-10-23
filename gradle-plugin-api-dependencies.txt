@@ -1,7 +1,7 @@
 # This file is generated automatically by `collectAllGradlePluginApiDependencies` Gradle task.
 # Do not modify it yourself unless you know what you are doing.
 
-org.ow2.asm:asm-bom:9.5:@pom
+org.ow2.asm:asm-bom:9.6:@pom
 org.projectlombok:lombok-mapstruct-binding:0.2.0
 org.projectlombok:lombok:1.18.30
 zzzz-classes-that-rely-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.ClosureUtils:a41076443bfac05e329070cdb26da07dcc243c58438ce2281e65bd9576c326e6
