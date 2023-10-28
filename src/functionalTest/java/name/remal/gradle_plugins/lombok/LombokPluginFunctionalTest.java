@@ -33,11 +33,12 @@ class LombokPluginFunctionalTest {
             build.applyPlugin("java");
             build.append("repositories { mavenCentral() }");
             build.append("tasks.withType(JavaCompile) { options.compilerArgs.add('-parameters') }");
-            build.append("tasks.named('compileJava') {"
-                + " options.generatedSourceOutputDirectory.fileValue(project.file('"
-                + escapeGroovy(APT_GENERATED_FOLDER)
-                + "'))"
-                + " }"
+            build.append(
+                "tasks.named('compileJava') {",
+                "    options.generatedSourceOutputDirectory.fileValue(",
+                "        project.file('" + escapeGroovy(APT_GENERATED_FOLDER) + "')",
+                "    )",
+                "}"
             );
         });
 
@@ -185,12 +186,18 @@ class LombokPluginFunctionalTest {
         @Test
         void micronaut() throws Throwable {
             project.forBuildFile(build -> {
-                build.append(format("dependencies { compileOnly '%s' }", escapeGroovy(getLibraryNotation(
-                    "io.micronaut:micronaut-validation"
-                ))));
-                build.append(format("dependencies { annotationProcessor '%s' }", escapeGroovy(getLibraryNotation(
-                    "io.micronaut:micronaut-inject-java"
-                ))));
+                build.append(format(
+                    "dependencies { compileOnly '%s' }",
+                    escapeGroovy(getLibraryNotation("io.micronaut.validation:micronaut-validation"))
+                ));
+                build.append(format(
+                    "dependencies { annotationProcessor '%s' }",
+                    escapeGroovy(getLibraryNotation("io.micronaut.validation:micronaut-validation-processor"))
+                ));
+                build.append(format(
+                    "dependencies { annotationProcessor '%s' }",
+                    escapeGroovy(getLibraryNotation("io.micronaut:micronaut-inject-java"))
+                ));
             });
 
             project.writeTextFile("src/main/java/pkg/TestClassValidated.java", join(
@@ -198,7 +205,7 @@ class LombokPluginFunctionalTest {
                 "package pkg;",
                 "",
                 "import jakarta.inject.Singleton;",
-                "import javax.validation.constraints.NotEmpty;",
+                "import jakarta.validation.constraints.NotEmpty;",
                 "import io.micronaut.core.annotation.Introspected;",
                 "import lombok.Data;",
                 "import lombok.Setter;",
