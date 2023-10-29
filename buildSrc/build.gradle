@@ -2,7 +2,7 @@
 
 buildscript {
     dependencies {
-        classpath 'name.remal.gradle-plugins.toolkit:build-logic:0.62.6'
+        classpath 'name.remal.gradle-plugins.toolkit:build-logic:0.62.7'
     }
     repositories {
         mavenCentral()
