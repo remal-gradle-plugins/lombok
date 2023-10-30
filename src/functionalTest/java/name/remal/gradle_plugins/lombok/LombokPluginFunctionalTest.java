@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import name.remal.gradle_plugins.toolkit.testkit.MinSupportedJavaVersion;
 import name.remal.gradle_plugins.toolkit.testkit.functional.GradleProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -31,7 +32,7 @@ class LombokPluginFunctionalTest {
         project.forBuildFile(build -> {
             build.applyPlugin("name.remal.lombok");
             build.applyPlugin("java");
-            build.append("repositories { mavenCentral() }");
+            build.addMavenCentralRepository();
             build.append("tasks.withType(JavaCompile) { options.compilerArgs.add('-parameters') }");
             build.append(
                 "tasks.named('compileJava') {",
@@ -184,21 +185,22 @@ class LombokPluginFunctionalTest {
         }
 
         @Test
-        void micronaut() throws Throwable {
-            project.forBuildFile(build -> {
-                build.append(format(
-                    "dependencies { compileOnly '%s' }",
+        @MinSupportedJavaVersion(17)
+        void micronaut() {
+            project.getBuildFile().appendBlock("dependencies", depsBlock -> depsBlock.append(
+                format(
+                    "compileOnly '%s'",
                     escapeGroovy(getLibraryNotation("io.micronaut.validation:micronaut-validation"))
-                ));
-                build.append(format(
-                    "dependencies { annotationProcessor '%s' }",
+                ),
+                format(
+                    "annotationProcessor '%s'",
                     escapeGroovy(getLibraryNotation("io.micronaut.validation:micronaut-validation-processor"))
-                ));
-                build.append(format(
-                    "dependencies { annotationProcessor '%s' }",
+                ),
+                format(
+                    "annotationProcessor '%s'",
                     escapeGroovy(getLibraryNotation("io.micronaut:micronaut-inject-java"))
-                ));
-            });
+                )
+            ));
 
             project.writeTextFile("src/main/java/pkg/TestClassValidated.java", join(
                 "\n",
