@@ -11,6 +11,7 @@ tasks.named('generateFunctionalTestJava') { Task task ->
         it.writeImport("lombok.val")
         it.println("")
         it.println("@NoArgsConstructor(access = PRIVATE)")
+        it.writeSuppressWarnings("checkstyle:LineLength", "checkstyle:RightCurlyAlone")
         it.writeBlock("abstract class ${it.simpleName}") {
             it.println("")
             it.println("private static final Map<String, String> MAPPING = ImmutableMap.<String, String>builder()")
