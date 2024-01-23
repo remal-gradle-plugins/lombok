@@ -116,8 +116,8 @@ dependencies {
     librariesToTestCompatibility 'org.mapstruct:mapstruct:1.5.5.Final'
     librariesToTestCompatibility 'org.mapstruct:mapstruct-processor:1.5.5.Final'
     librariesToTestCompatibility 'io.micronaut:micronaut-inject-java:4.2.3'
-    librariesToTestCompatibility 'io.micronaut.validation:micronaut-validation:4.2.0'
-    librariesToTestCompatibility 'io.micronaut.validation:micronaut-validation-processor:4.2.0'
+    librariesToTestCompatibility 'io.micronaut.validation:micronaut-validation:4.3.0'
+    librariesToTestCompatibility 'io.micronaut.validation:micronaut-validation-processor:4.3.0'
 }
 
 apply from: 'build-generate-LibrariesToTestCompatibility.gradle'
