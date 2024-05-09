@@ -26,6 +26,26 @@ import org.gradle.api.tasks.compile.JavaCompile;
 @NoArgsConstructor(access = PRIVATE)
 public abstract class LombokConfigUtils {
 
+    public static List<LombokConfig> parseLombokConfigs(Collection<File> sourceDirs) {
+        sourceDirs = sourceDirs.stream()
+            .distinct()
+            .map(FileUtils::normalizeFile)
+            .distinct()
+            .sorted()
+            .collect(toList());
+
+        Map<List<LombokConfigPath>, LombokConfig> lombokConfigMap = new LinkedHashMap<>();
+        for (val sourceDir : sourceDirs) {
+            val lombokConfig = new LombokConfig(sourceDir);
+            val lombokConfigFiles = lombokConfig.getConfigFiles().stream()
+                .map(LombokConfigFile::getFile)
+                .collect(toList());
+            lombokConfigMap.computeIfAbsent(lombokConfigFiles, __ -> lombokConfig);
+        }
+
+        return new ArrayList<>(lombokConfigMap.values());
+    }
+
     public static List<LombokConfig> parseLombokConfigs(JavaCompile task) {
         val extensions = task.getExtensions();
         LombokConfigs container = extensions.findByType(LombokConfigs.class);
@@ -45,26 +65,6 @@ public abstract class LombokConfigUtils {
     @Getter
     private static class LombokConfigs {
         private final List<LombokConfig> configs;
-    }
-
-    public static List<LombokConfig> parseLombokConfigs(Collection<File> sourceDirs) {
-        sourceDirs = sourceDirs.stream()
-            .distinct()
-            .map(FileUtils::normalizeFile)
-            .distinct()
-            .sorted()
-            .collect(toList());
-
-        Map<List<LombokConfigPath>, LombokConfig> lombokConfigMap = new LinkedHashMap<>();
-        for (val sourceDir : sourceDirs) {
-            val lombokConfig = new LombokConfig(sourceDir);
-            val lombokConfigFiles = lombokConfig.getConfigFiles().stream()
-                .map(LombokConfigFile::getFile)
-                .collect(toList());
-            lombokConfigMap.computeIfAbsent(lombokConfigFiles, __ -> lombokConfig);
-        }
-
-        return new ArrayList<>(lombokConfigMap.values());
     }
 
 
