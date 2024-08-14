@@ -122,8 +122,8 @@ dependencies {
     librariesToTestCompatibility 'org.mapstruct:mapstruct:1.6.0'
     librariesToTestCompatibility 'org.mapstruct:mapstruct-processor:1.6.0'
     librariesToTestCompatibility 'io.micronaut:micronaut-inject-java:4.6.0'
-    librariesToTestCompatibility 'io.micronaut.validation:micronaut-validation:4.6.1'
-    librariesToTestCompatibility 'io.micronaut.validation:micronaut-validation-processor:4.6.1'
+    librariesToTestCompatibility 'io.micronaut.validation:micronaut-validation:4.7.0'
+    librariesToTestCompatibility 'io.micronaut.validation:micronaut-validation-processor:4.7.0'
 }
 
 ; [
