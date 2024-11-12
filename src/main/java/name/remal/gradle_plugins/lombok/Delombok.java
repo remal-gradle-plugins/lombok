@@ -8,7 +8,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static name.remal.gradle_plugins.toolkit.PathUtils.createParentDirectories;
 import static name.remal.gradle_plugins.toolkit.PathUtils.deleteRecursively;
-import static org.gradle.api.tasks.PathSensitivity.ABSOLUTE;
+import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -73,7 +73,7 @@ public abstract class Delombok extends AbstractLombokTask {
     @org.gradle.api.tasks.Optional
     @InputFiles
     @IgnoreEmptyDirectories
-    @PathSensitive(ABSOLUTE)
+    @PathSensitive(RELATIVE)
     public abstract ConfigurableFileCollection getInputFiles();
 
 
