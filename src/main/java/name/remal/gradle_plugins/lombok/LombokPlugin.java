@@ -302,6 +302,7 @@ public abstract class LombokPlugin implements Plugin<Project> {
     }
 
 
+    @SuppressWarnings({"Slf4jFormatShouldBeConst", "StringConcatenationArgumentToLogCall"})
     private void configureConfigGeneration() {
         afterEvaluateOrNow(project, __ -> {
             val isEnabled = lombokExtension.getConfig().getGenerate().getEnabled().getOrNull();

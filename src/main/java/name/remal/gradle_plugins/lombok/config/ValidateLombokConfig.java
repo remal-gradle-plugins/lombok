@@ -107,6 +107,7 @@ public abstract class ValidateLombokConfig
     public abstract SetProperty<String> getDisabledRules();
 
     @TaskAction
+    @SuppressWarnings("Slf4jFormatShouldBeConst")
     public void execute() {
         val lombokConfigs = getLombokConfigs().get();
 
