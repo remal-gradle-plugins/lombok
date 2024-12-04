@@ -121,7 +121,7 @@ createLombokArtifactsConfiguration('librariesToTestCompatibility', false)
 dependencies {
     librariesToTestCompatibility 'org.mapstruct:mapstruct:1.6.3'
     librariesToTestCompatibility 'org.mapstruct:mapstruct-processor:1.6.3'
-    librariesToTestCompatibility 'io.micronaut:micronaut-inject-java:4.7.6'
+    librariesToTestCompatibility 'io.micronaut:micronaut-inject-java:4.7.7'
     librariesToTestCompatibility 'io.micronaut.validation:micronaut-validation:4.8.0'
     librariesToTestCompatibility 'io.micronaut.validation:micronaut-validation-processor:4.8.0'
 }
