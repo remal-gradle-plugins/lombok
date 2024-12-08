@@ -4,12 +4,13 @@
 org.ow2.asm:asm-bom:9.7.1:@pom
 org.projectlombok:lombok-mapstruct-binding:0.2.0
 org.projectlombok:lombok:1.18.36
+zzzz-classes-relying-on-external-dependency:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.reflection.LatestLtsJdkModules:bf4e2f0693eacb9f8340c1689587d64a15a128ff92fd9db6b588380ba15edf28
 zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.LombokPlugin:57615a93cee4b6840845cef4a29d95c85d9cd3ba77420ddac51080496ac16fd7
 zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.ClosureUtils:a41076443bfac05e329070cdb26da07dcc243c58438ce2281e65bd9576c326e6
 zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.DebugUtils$1:f1d960ad9cb14959258c51e1198f7c9103b676511d40111bd79590076f9a6d2a
 zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.DebugUtils$IfDebugEnabled:1fdc98a89b3051754a9e2b2b02d780389d5e7f8cdfef917e7c059d842e73c182
 zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.DebugUtils:f413c74b2a09b38edca1a51d916694ca42c722dd0e8f2a948bb6a59f72749336
-zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.ReportContainerUtils:de4e5033a4c47790e4e052b9c8775a67dc48e6cb66b85f5e134a714b441da5ef
+zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.ReportContainerUtils:5ce952e5c0128c413dead9974dfea6148bb80911ca54e2d7c29d2320a02a7047
 zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.ReportContainerUtilsMethods:53330fe2c57c9c968c4840b2c8d66ac81152f5980aef54a27ae1545d0ce038b0
 zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.ReportContainerUtilsMethodsDefault$1:8ab452a83454b52760b33d8f5e61c6cef62a828318225952f1b905a811647476
 zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.ReportContainerUtilsMethodsDefault:d89ce1f5e713974ebbb8ed28e8fc028a8671ab7efce814ee4f6b58be15cac31d
@@ -21,4 +22,8 @@ zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.int
 zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.Version:c2fbaef9f508ebd23c5031ad3b41341e8f6b71a41e587b116a01f02e16013167
 zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.reflection.ReflectionUtils$1$1:5af41d106668e042badc0a0ce8e37eb4bd148f681f76292408b4fc69d802d4b9
 zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.reflection.ReflectionUtils$1:c72bcb9162cb9ad41153959d924399d99a6a186fe0779064a5064ff45b77bf97
-zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.reflection.ReflectionUtils:dd3495b70e8eb33eaf9be745d3e60cb65196ebe7500b1dbcaa733f1037664181
+zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.reflection.ReflectionUtils:b5d54b4272034914fc1cac48ca889b3be8556da20692ba22f27bfed5d5184909
+zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.reflection.ReflectionUtilsMethods:63696acef2462df82b156eb65261430e649df161b663206d970a1ae15091559e
+zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.reflection.ReflectionUtilsMethods_8_lte$UrlResourcesOnlyClassLoader:3aea94f8aa6575f9582dd757125ecac3d2806b17d7c80c7ac2d946ad9d70e681
+zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.reflection.ReflectionUtilsMethods_8_lte:43e589fcc5574d166dc949c255637298144c471433db80674dfee766350d4d2f
+zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.internal._relocated.name.remal.gradle_plugins.toolkit.reflection.ReflectionUtilsMethods_9_gte:b3dce5c804960803af7dc914f95079975a066d3a8a4c231bf59b640d7b8fa3a8
