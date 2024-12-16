@@ -6,6 +6,12 @@
 
 [![configuration cache: supported from v2.2](https://img.shields.io/static/v1?label=configuration%20cache&message=supported+from+v2.2&color=success)](https://docs.gradle.org/current/userguide/configuration_cache.html)
 
+Usage:
+
+<!--plugin-usage:name.remal.finalize-by-jacoco--><!--/plugin-usage-->
+
+&nbsp;
+
 This plugin adds [Lombok annotation processor](https://mvnrepository.com/artifact/org.projectlombok/lombok/1.18.36) to `compileOnly` and `annotationProcessor` configurations for every [`SourceSet`](https://docs.gradle.org/current/javadoc/org/gradle/api/tasks/SourceSet.html).
 
 This is done via creating `lombok` configuration and making `compileOnly` and `annotationProcessor` configurations extend it.
