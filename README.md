@@ -8,7 +8,13 @@
 
 Usage:
 
-<!--plugin-usage:name.remal.finalize-by-jacoco--><!--/plugin-usage-->
+<!--plugin-usage:name.remal.finalize-by-jacoco-->
+```groovy
+plugins {
+    id 'name.remal.finalize-by-jacoco' version '1.0.4'
+}
+```
+<!--/plugin-usage-->
 
 &nbsp;
 
