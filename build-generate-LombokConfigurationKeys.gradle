@@ -12,8 +12,12 @@ import com.github.javaparser.ast.body.VariableDeclarator
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.ObjectCreationExpr
 import com.github.javaparser.ast.visitor.GenericVisitorAdapter
+import javax.inject.Inject
+import org.gradle.api.internal.file.FileOperations
 
 tasks.named('generateJava') { Task task ->
+    Injections injections = project.objects.newInstance(Injections)
+
     inputs.files(configurations.lombokSources).withPropertyName('lombokSources')
     classFile("${project.calculateBaseJavaPackage()}.config", 'LombokConfigurationKey') {
         it.writePackage()
@@ -30,6 +34,7 @@ tasks.named('generateJava') { Task task ->
             it.println("boolean deprecated;")
         }
     }
+
     classFile("${project.calculateBaseJavaPackage()}.config", 'LombokConfigurationKeys') {
         it.writePackage()
         it.println("")
@@ -47,41 +52,53 @@ tasks.named('generateJava') { Task task ->
             it.println("")
             it.println("private static final List<LombokConfigurationKey> KEYS = ImmutableList.<LombokConfigurationKey>builder()")
 
-            FileTree lombokSourcesTree = project.files().asFileTree
+            FileTree lombokSourcesTree = injections.objects.fileCollection().asFileTree
             configurations.lombokSources.files.forEach { File file ->
                 if (file.isDirectory()) {
-                    lombokSourcesTree += project.fileTree(file)
+                    lombokSourcesTree += injections.fileOperations.fileTree(file)
                 } else {
-                    lombokSourcesTree += project.zipTree(file)
+                    lombokSourcesTree += injections.fileOperations.zipTree(file)
                 }
             }
 
             Set<String> foundLombokConfigProperties = new LinkedHashSet<>()
             lombokSourcesTree.matching { include('lombok/ConfigurationKeys.java') }.visit { FileVisitDetails fileVisitDetails ->
-                if (fileVisitDetails.isDirectory()) return
+                if (fileVisitDetails.isDirectory()) {
+                    return
+                }
 
                 ParserConfiguration parserConfiguration = new ParserConfiguration()
                 parserConfiguration.languageLevel = ParserConfiguration.LanguageLevel.RAW
 
                 JavaParser javaParser = new JavaParser(parserConfiguration)
                 ParseResult<CompilationUnit> parseResult = javaParser.parse(fileVisitDetails.open())
-                if (!parseResult.problems.isEmpty()) throw new ParseProblemException(parseResult.problems)
+                if (!parseResult.problems.isEmpty()) {
+                    throw new ParseProblemException(parseResult.problems)
+                }
 
                 CompilationUnit compilationUnit = parseResult.result.get()
                 compilationUnit.accept(
                     new GenericVisitorAdapter() {
                         Object visit(FieldDeclaration field, Object arg) {
-                            if (![publicModifier(), staticModifier(), finalModifier()].every { field.getModifiers().contains(it) }) return super.visit(field, arg)
+                            if (![publicModifier(), staticModifier(), finalModifier()].every { field.getModifiers().contains(it) }) {
+                                return super.visit(field, arg)
+                            }
 
                             VariableDeclarator variable = field.getVariable(0)
-                            if (variable.type.asClassOrInterfaceType().name.asString() != 'ConfigurationKey') return super.visit(field, arg)
+                            if (variable.type.asClassOrInterfaceType().name.asString() != 'ConfigurationKey') {
+                                return super.visit(field, arg)
+                            }
 
                             Expression untypedInitializer = variable.initializer.orElse(null)
-                            if (!(untypedInitializer instanceof ObjectCreationExpr)) return super.visit(field, arg)
+                            if (!(untypedInitializer instanceof ObjectCreationExpr)) {
+                                return super.visit(field, arg)
+                            }
                             ObjectCreationExpr initializer = (ObjectCreationExpr) untypedInitializer
 
                             String configKey = initializer.getArgument(0).asStringLiteralExpr().value
-                            if (!foundLombokConfigProperties.add(configKey.toLowerCase())) throw new GradleException("Duplicate Lombok config key: $configKey")
+                            if (!foundLombokConfigProperties.add(configKey.toLowerCase())) {
+                                throw new GradleException("Duplicate Lombok config key: $configKey")
+                            }
 
                             boolean isDeprecated = field.annotations.any { it.name.identifier == 'Deprecated' }
 
@@ -107,7 +124,9 @@ tasks.named('generateJava') { Task task ->
                 'lombok.data.flagUsage',
                 'lombok.value.flagUsage',
             ].forEach {
-                if (!foundLombokConfigProperties.contains(it.toLowerCase())) throw new GradleException("Lombok config property is not found: $it")
+                if (!foundLombokConfigProperties.contains(it.toLowerCase())) {
+                    throw new GradleException("Lombok config property is not found: $it")
+                }
             }
 
             it.println("    .build();")
@@ -129,4 +148,14 @@ tasks.named('generateJava') { Task task ->
             }
         }
     }
+}
+
+interface Injections {
+
+    @Inject
+    ObjectFactory getObjects()
+
+    @Inject
+    FileOperations getFileOperations()
+
 }
