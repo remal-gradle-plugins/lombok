@@ -15,42 +15,38 @@ import com.github.javaparser.ast.visitor.GenericVisitorAdapter
 import javax.inject.Inject
 import org.gradle.api.internal.file.FileOperations
 
-tasks.named('generateJava') { Task task ->
+generateSources.forMainSourceSet.java {
     Injections injections = project.objects.newInstance(Injections)
 
     inputs.files(configurations.lombokSources).withPropertyName('lombokSources')
     classFile("${project.calculateBaseJavaPackage()}.config", 'LombokConfigurationKey') {
-        it.writePackage()
-        it.println("")
-        it.writeImport("lombok.Builder")
-        it.writeImport("lombok.NonNull")
-        it.writeImport("lombok.Value")
-        it.println("")
-        it.println("@Value")
-        it.println("@Builder")
-        it.writeBlock("public class ${it.simpleName}") {
-            it.println("@NonNull String name;")
-            it.println("@NonNull String description;")
-            it.println("boolean deprecated;")
+        addImport("lombok.Builder")
+        addImport("lombok.NonNull")
+        addImport("lombok.Value")
+
+        line("@Value")
+        line("@Builder")
+        block("public class ${simpleName}") {
+            line("@NonNull String name;")
+            line("@NonNull String description;")
+            line("boolean deprecated;")
         }
     }
 
     classFile("${project.calculateBaseJavaPackage()}.config", 'LombokConfigurationKeys') {
-        it.writePackage()
-        it.println("")
-        it.writeStaticImport("lombok.AccessLevel", "PRIVATE")
-        it.println("")
-        it.writeImport("com.google.common.collect.ImmutableList")
-        it.writeImport("java.util.List")
-        it.writeImport("javax.annotation.Nullable")
-        it.writeImport("lombok.NoArgsConstructor")
-        it.writeImport("lombok.val")
-        it.println("")
-        it.println("@NoArgsConstructor(access = PRIVATE)")
-        it.writeSuppressWarnings("checkstyle:LineLength", "checkstyle:RightCurlyAlone")
-        it.writeBlock("public abstract class ${it.simpleName}") {
-            it.println("")
-            it.println("private static final List<LombokConfigurationKey> KEYS = ImmutableList.<LombokConfigurationKey>builder()")
+        addStaticImport("lombok.AccessLevel", "PRIVATE")
+
+        addImport("com.google.common.collect.ImmutableList")
+        addImport("java.util.List")
+        addImport("javax.annotation.Nullable")
+        addImport("lombok.NoArgsConstructor")
+        addImport("lombok.val")
+
+        line("@NoArgsConstructor(access = PRIVATE)")
+        suppressWarningsLine("checkstyle:LineLength", "checkstyle:RightCurlyAlone")
+        block("public abstract class ${simpleName}") { classContent ->
+            line("")
+            line("private static final List<LombokConfigurationKey> KEYS = ImmutableList.<LombokConfigurationKey>builder()")
 
             FileTree lombokSourcesTree = injections.objects.fileCollection().asFileTree
             configurations.lombokSources.files.forEach { File file ->
@@ -77,44 +73,42 @@ tasks.named('generateJava') { Task task ->
                 }
 
                 CompilationUnit compilationUnit = parseResult.result.get()
-                compilationUnit.accept(
-                    new GenericVisitorAdapter() {
-                        Object visit(FieldDeclaration field, Object arg) {
-                            if (![publicModifier(), staticModifier(), finalModifier()].every { field.getModifiers().contains(it) }) {
-                                return super.visit(field, arg)
-                            }
-
-                            VariableDeclarator variable = field.getVariable(0)
-                            if (variable.type.asClassOrInterfaceType().name.asString() != 'ConfigurationKey') {
-                                return super.visit(field, arg)
-                            }
-
-                            Expression untypedInitializer = variable.initializer.orElse(null)
-                            if (!(untypedInitializer instanceof ObjectCreationExpr)) {
-                                return super.visit(field, arg)
-                            }
-                            ObjectCreationExpr initializer = (ObjectCreationExpr) untypedInitializer
-
-                            String configKey = initializer.getArgument(0).asStringLiteralExpr().value
-                            if (!foundLombokConfigProperties.add(configKey.toLowerCase())) {
-                                throw new GradleException("Duplicate Lombok config key: $configKey")
-                            }
-
-                            boolean isDeprecated = field.annotations.any { it.name.identifier == 'Deprecated' }
-
-                            it.println("    .add(LombokConfigurationKey.builder()")
-                            it.println("        .name(\"${it.escapeJava(configKey)}\")")
-                            it.println("        .description(${initializer.getArgument(1)})")
-                            if (isDeprecated) {
-                                it.println("        .deprecated(true)")
-                            }
-                            it.println("        .build()")
-                            it.println("    )")
-
+                compilationUnit.accept(new GenericVisitorAdapter() {
+                    Object visit(FieldDeclaration field, Object arg) {
+                        if (![publicModifier(), staticModifier(), finalModifier()].every { field.getModifiers().contains(it) }) {
                             return super.visit(field, arg)
                         }
-                    }, null
-                )
+
+                        VariableDeclarator variable = field.getVariable(0)
+                        if (variable.type.asClassOrInterfaceType().name.asString() != 'ConfigurationKey') {
+                            return super.visit(field, arg)
+                        }
+
+                        Expression untypedInitializer = variable.initializer.orElse(null)
+                        if (!(untypedInitializer instanceof ObjectCreationExpr)) {
+                            return super.visit(field, arg)
+                        }
+                        ObjectCreationExpr initializer = (ObjectCreationExpr) untypedInitializer
+
+                        String configKey = initializer.getArgument(0).asStringLiteralExpr().value
+                        if (!foundLombokConfigProperties.add(configKey.toLowerCase())) {
+                            throw new GradleException("Duplicate Lombok config key: $configKey")
+                        }
+
+                        boolean isDeprecated = field.annotations.any { it.name.identifier == 'Deprecated' }
+
+                        classContent.line("    .add(LombokConfigurationKey.builder()")
+                        classContent.line("        .name(\"${classContent.escapeString(configKey)}\")")
+                        classContent.line("        .description(${initializer.getArgument(1)})")
+                        if (isDeprecated) {
+                            classContent.line("        .deprecated(true)")
+                        }
+                        classContent.line("        .build()")
+                        classContent.line("    )")
+
+                        return super.visit(field, arg)
+                    }
+                }, null)
             }
 
             [
@@ -129,22 +123,22 @@ tasks.named('generateJava') { Task task ->
                 }
             }
 
-            it.println("    .build();")
+            line("    .build();")
 
-            it.println("")
-            it.println("@Nullable")
-            it.writeBlock("public static LombokConfigurationKey findLombokConfigurationKeyFor(String value)") {
-                it.writeBlock("for (val key : KEYS)") {
-                    it.writeBlock("if (key.getName().equalsIgnoreCase(value))") {
-                        it.println("return key;")
+            line("")
+            line("@Nullable")
+            block("public static LombokConfigurationKey findLombokConfigurationKeyFor(String value)") {
+                block("for (val key : KEYS)") {
+                    block("if (key.getName().equalsIgnoreCase(value))") {
+                        line("return key;")
                     }
                 }
-                it.println("return null;")
+                line("return null;")
             }
 
-            it.println("")
-            it.writeBlock("public static List<LombokConfigurationKey> getAllLombokConfigurationKeys()") {
-                it.println("return KEYS;")
+            line("")
+            block("public static List<LombokConfigurationKey> getAllLombokConfigurationKeys()") {
+                line("return KEYS;")
             }
         }
     }

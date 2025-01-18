@@ -8,7 +8,6 @@ import static java.nio.file.Files.isRegularFile;
 import static java.nio.file.Files.readAllBytes;
 import static name.remal.gradle_plugins.lombok.LibrariesToTestCompatibility.getLibraryNotation;
 import static name.remal.gradle_plugins.toolkit.PathUtils.deleteRecursively;
-import static name.remal.gradle_plugins.toolkit.StringUtils.escapeGroovy;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.file.Path;
@@ -33,14 +32,14 @@ class LombokPluginFunctionalTest {
             build.applyPlugin("name.remal.lombok");
             build.applyPlugin("java");
             build.addMavenCentralRepository();
-            build.append("tasks.withType(JavaCompile) { options.compilerArgs.add('-parameters') }");
-            build.append(
+            build.line("tasks.withType(JavaCompile) { options.compilerArgs.add('-parameters') }");
+            build.line(join("\n", new String[]{
                 "tasks.named('compileJava') {",
                 "    options.generatedSourceOutputDirectory.fileValue(",
-                "        project.file('" + escapeGroovy(APT_GENERATED_FOLDER) + "')",
+                "        project.file('" + build.escapeString(APT_GENERATED_FOLDER) + "')",
                 "    )",
                 "}"
-            );
+            }));
         });
 
         project.writeTextFile("lombok.config", join(
@@ -80,73 +79,56 @@ class LombokPluginFunctionalTest {
 
     @Test
     void compilation() {
-        project.getBuildFile()
-            .registerDefaultTask("compileJava");
-        project.assertBuildSuccessfully();
+        project.assertBuildSuccessfully("compileJava");
     }
 
     @Test
     void javadoc() {
-        project.getBuildFile()
-            .append("java.withJavadocJar()")
-            .registerDefaultTask("javadoc");
-        project.assertBuildSuccessfully();
+        project.getBuildFile().line("java.withJavadocJar()");
+        project.assertBuildSuccessfully("javadoc");
     }
 
     @Test
     void lombokConfigValidationFails() {
-        project.getBuildFile()
-            .registerDefaultTask("validateLombokConfig");
-        project.assertBuildFails();
+        project.assertBuildFails("validateLombokConfig");
     }
 
     @Test
     void lombokConfigValidationSucceeds() {
-        project.getBuildFile()
-            .append("lombok.config.validate.disabledRules.addAll("
-                + "'AddGeneratedAnnotation',"
-                + "'ConfigureAccessorsUsage',"
-                + "'ConfigureUtilityClassUsage',"
-                + ")")
-            .registerDefaultTask("validateLombokConfig");
-        project.assertBuildSuccessfully();
+        project.getBuildFile().line("lombok.config.validate.disabledRules.addAll("
+            + "'AddGeneratedAnnotation',"
+            + "'ConfigureAccessorsUsage',"
+            + "'ConfigureUtilityClassUsage',"
+            + ")");
+        project.assertBuildSuccessfully("validateLombokConfig");
     }
 
     @Test
     void generateConfig() {
         deleteRecursively(project.getProjectDir().toPath().resolve("lombok.config"));
 
-        project.getBuildFile()
-            .append("lombok.config.generate { enabled = true; set('config.stopBubbling', true); }")
-            .registerDefaultTask("compileJava");
-        project.assertBuildSuccessfully();
+        project.getBuildFile().line("lombok.config.generate { enabled = true; set('config.stopBubbling', true); }");
+        project.assertBuildSuccessfully("compileJava");
     }
 
 
     @Test
     void doesNotConflictWithTransitiveDependencies() {
-        project.getBuildFile()
-            .append("dependencies { implementation 'net.serenity-bdd:serenity-core:3.6.22' }")
-            .registerDefaultTask("compileJava");
-        project.assertBuildSuccessfully();
+        project.getBuildFile().line("dependencies { implementation 'net.serenity-bdd:serenity-core:3.6.22' }");
+        project.assertBuildSuccessfully("compileJava");
     }
 
 
     @Nested
     class Compatibilities {
 
-        @BeforeEach
-        void beforeEach() {
-            project.getBuildFile().registerDefaultTask("compileJava");
-        }
-
         @Test
         void mapstruct() throws Throwable {
             project.forBuildFile(build -> {
-                build.append(format("dependencies { compileOnly '%s' }", escapeGroovy(getLibraryNotation(
+                build.line(format("dependencies { compileOnly '%s' }", build.escapeString(getLibraryNotation(
                     "org.mapstruct:mapstruct"
                 ))));
-                build.append(format("dependencies { annotationProcessor '%s' }", escapeGroovy(getLibraryNotation(
+                build.line(format("dependencies { annotationProcessor '%s' }", build.escapeString(getLibraryNotation(
                     "org.mapstruct:mapstruct-processor"
                 ))));
             });
@@ -177,7 +159,7 @@ class LombokPluginFunctionalTest {
                 "}"
             ));
 
-            project.assertBuildSuccessfully();
+            project.assertBuildSuccessfully("compileJava");
 
             val contentBytes = readAllBytes(getGeneratedFile(APT_GENERATED_FOLDER + "/pkg/TestClassMapperImpl.java"));
             val content = new String(contentBytes, UTF_8);
@@ -187,20 +169,20 @@ class LombokPluginFunctionalTest {
         @Test
         @MinSupportedJavaVersion(17)
         void micronaut() {
-            project.getBuildFile().appendBlock("dependencies", depsBlock -> depsBlock.append(
-                format(
+            project.getBuildFile().block("dependencies", deps -> {
+                deps.line(
                     "compileOnly '%s'",
-                    escapeGroovy(getLibraryNotation("io.micronaut.validation:micronaut-validation"))
-                ),
-                format(
+                    deps.escapeString(getLibraryNotation("io.micronaut.validation:micronaut-validation"))
+                );
+                deps.line(
                     "annotationProcessor '%s'",
-                    escapeGroovy(getLibraryNotation("io.micronaut.validation:micronaut-validation-processor"))
-                ),
-                format(
+                    deps.escapeString(getLibraryNotation("io.micronaut.validation:micronaut-validation-processor"))
+                );
+                deps.line(
                     "annotationProcessor '%s'",
-                    escapeGroovy(getLibraryNotation("io.micronaut:micronaut-inject-java"))
-                )
-            ));
+                    deps.escapeString(getLibraryNotation("io.micronaut:micronaut-inject-java"))
+                );
+            });
 
             project.writeTextFile("src/main/java/pkg/TestClassValidated.java", join(
                 "\n",
@@ -221,7 +203,7 @@ class LombokPluginFunctionalTest {
                 "}"
             ));
 
-            project.assertBuildSuccessfully();
+            project.assertBuildSuccessfully("compileJava");
 
             assertGeneratedFileExists("build/classes/java/main/pkg/$TestClassValidated$Definition$Exec.class");
         }

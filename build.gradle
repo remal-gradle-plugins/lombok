@@ -6,7 +6,7 @@ buildscript {
     String rootSnapshotVersion = project.ext.rootSnapshotVersion = '2-SNAPSHOT'
     dependencies {
         //classpath("$rootGroupId:$rootArtifactId:$rootSnapshotVersion") { version { strictly(rootSnapshotVersion) } }
-        classpath 'name.remal.gradle-plugins.toolkit:build-logic:0.70.6'
+        classpath 'name.remal.gradle-plugins.toolkit:build-logic:0.71.0'
     }
     repositories {
         mavenCentral()
@@ -29,9 +29,6 @@ apply plugin: 'java-gradle-plugin'
 apply plugin: 'name.remal.generate-sources'
 
 dependencies {
-    relocateClasses 'com.google.guava:guava'
-
-
     testImplementation 'com.google.jimfs:jimfs:1.3.0'
 }
 
@@ -87,13 +84,17 @@ dependencies {
 Closure<ExternalModuleDependency> getLombokDependency = {
     Dependency lombokDep = (ExternalModuleDependency) configurations.lombokCoreArtifacts.dependencies
         .find { "${it.group}:${it.name}" == 'org.projectlombok:lombok' }
-    if (lombokDep == null) throw new GradleException("Lombok dependency can't be found")
+    if (lombokDep == null) {
+        throw new GradleException("Lombok dependency can't be found")
+    }
     return (ExternalModuleDependency) lombokDep
 }
 Closure<ExternalModuleDependency> getLombokMapStructBindingDependency = {
     Dependency lombokDep = (ExternalModuleDependency) configurations.lombokCoreArtifacts.dependencies
         .find { "${it.group}:${it.name}" == 'org.projectlombok:lombok-mapstruct-binding' }
-    if (lombokDep == null) throw new GradleException("Lombok MapStruct binding dependency can't be found")
+    if (lombokDep == null) {
+        throw new GradleException("Lombok MapStruct binding dependency can't be found")
+    }
     return (ExternalModuleDependency) lombokDep
 }
 
@@ -105,14 +106,8 @@ createLombokArtifactsConfiguration('lombokSources', false) { Configuration conf 
     }
 }
 
-; [
-    'build-generate-LombokDependencies.gradle',
-    'build-generate-LombokConfigurationKeys.gradle',
-].forEach { fileName ->
-    apply from: fileName
-    tasks.named('generateJava').configure { it.inputs.file(fileName) }
-    tasks.named('generateResources').configure { it.inputs.file(fileName) }
-}
+apply from: 'build-generate-LombokDependencies.gradle'
+apply from: 'build-generate-LombokConfigurationKeys.gradle'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -126,29 +121,22 @@ dependencies {
     librariesToTestCompatibility 'io.micronaut.validation:micronaut-validation-processor:4.8.0'
 }
 
-; [
-    'build-generate-LibrariesToTestCompatibility.gradle',
-].forEach { fileName ->
-    apply from: fileName
-    tasks.named('generateJava').configure { it.inputs.file(fileName) }
-    tasks.named('generateResources').configure { it.inputs.file(fileName) }
-}
+apply from: 'build-generate-LibrariesToTestCompatibility.gradle'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-tasks.named('generateJava') { Task task ->
+generateSources.forMainSourceSet.java {
     String repositoryHtmlUrl = project.ext['repository-html-url']
     inputs.property('repository-html-url', repositoryHtmlUrl)
+
     classFile("${project.calculateBaseJavaPackage()}.config.rule", 'DocUtils') {
-        it.writePackage()
-        it.println("")
-        it.writeStaticImport("lombok.AccessLevel", "PRIVATE")
-        it.println("")
-        it.writeImport("lombok.NoArgsConstructor")
-        it.println("")
-        it.println("@NoArgsConstructor(access = PRIVATE)")
-        it.writeBlock("abstract class ${it.simpleName}") {
-            it.println("public static final String PLUGIN_REPOSITORY_HTML_URL = \"${it.escapeJava(repositoryHtmlUrl)}\";")
+        addStaticImport("lombok.AccessLevel", "PRIVATE")
+
+        addImport("lombok.NoArgsConstructor")
+
+        line("@NoArgsConstructor(access = PRIVATE)")
+        block("abstract class ${it.simpleName}") {
+            line("public static final String PLUGIN_REPOSITORY_HTML_URL = \"${escapeString(repositoryHtmlUrl)}\";")
         }
     }
 }
