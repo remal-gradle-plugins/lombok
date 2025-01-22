@@ -39,7 +39,6 @@ generateSources.forMainSourceSet.java {
         addImport("java.util.List")
         addImport("javax.annotation.Nullable")
         addImport("lombok.NoArgsConstructor")
-        addImport("lombok.val")
 
         line("@NoArgsConstructor(access = PRIVATE)")
         suppressWarningsLine("checkstyle:LineLength", "checkstyle:RightCurlyAlone", "checkstyle:SeparatorWrapComma")
@@ -128,7 +127,7 @@ generateSources.forMainSourceSet.java {
             line("")
             line("@Nullable")
             block("public static LombokConfigurationKey findLombokConfigurationKeyFor(String value)") {
-                block("for (val key : KEYS)") {
+                block("for (var key : KEYS)") {
                     block("if (key.getName().equalsIgnoreCase(value))") {
                         line("return key;")
                     }

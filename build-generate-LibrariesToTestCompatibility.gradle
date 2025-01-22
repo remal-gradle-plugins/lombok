@@ -7,7 +7,6 @@ generateSources.forSourceSet(sourceSets.functionalTest).java {
         addImport("com.google.common.collect.ImmutableMap")
         addImport("java.util.Map")
         addImport("lombok.NoArgsConstructor")
-        addImport("lombok.val")
 
         line("@NoArgsConstructor(access = PRIVATE)")
         suppressWarningsLine("checkstyle:LineLength", "checkstyle:RightCurlyAlone")
@@ -28,7 +27,7 @@ generateSources.forSourceSet(sourceSets.functionalTest).java {
 
             line("")
             block("public static String getLibraryNotation(String id)") {
-                line("val notation = MAPPING.get(id);")
+                line("var notation = MAPPING.get(id);")
                 block("if (notation == null)") {
                     line("throw new IllegalStateException(\"Notation is not registered: \" + id);")
                 }

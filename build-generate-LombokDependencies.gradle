@@ -30,7 +30,6 @@ generateSources.forMainSourceSet.java {
         addImport("com.google.common.collect.ImmutableMap")
         addImport("java.util.Map")
         addImport("lombok.NoArgsConstructor")
-        addImport("lombok.val")
 
         line("@NoArgsConstructor(access = PRIVATE)")
         block("abstract class ${simpleName}") {
@@ -65,7 +64,7 @@ generateSources.forMainSourceSet.java {
 
             line("")
             block("public static LombokDependency getLombokDependency(String id)") {
-                line("val dependency = getLombokDependencies().get(id);")
+                line("var dependency = getLombokDependencies().get(id);")
                 block("if (dependency == null)") {
                     line("throw new IllegalStateException(\"Lombok dependency is not registered: \" + id);")
                 }
