@@ -137,7 +137,7 @@ If there is a compatibility issue and the Lombok annotation processor has to be 
 
 # Migration guide
 
-## Version 2.* to 3.*
+## Version 2.* to 3.*
 
 The minimum Java version is 11 (from 8).
 The minimum Gradle version is 7.0 (from 6.7).
