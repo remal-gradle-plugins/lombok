@@ -8,7 +8,6 @@ import static name.remal.gradle_plugins.toolkit.PathUtils.createParentDirectorie
 import com.google.errorprone.annotations.ForOverride;
 import java.io.File;
 import lombok.SneakyThrows;
-import lombok.val;
 import org.gradle.api.GradleException;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.tasks.Internal;
@@ -38,8 +37,8 @@ abstract class BaseCreateLombokJar extends AbstractLombokTask {
     @Override
     @SneakyThrows
     protected void afterExecute(JavaExecSpec execSpec) {
-        val generatedFileName = getGeneratedFileName();
-        val generatedFile = new File(execSpec.getWorkingDir(), generatedFileName);
+        var generatedFileName = getGeneratedFileName();
+        var generatedFile = new File(execSpec.getWorkingDir(), generatedFileName);
         if (!generatedFile.isFile()) {
             throw new GradleException(format(
                 "%s file can't be found: %s",
@@ -48,7 +47,7 @@ abstract class BaseCreateLombokJar extends AbstractLombokTask {
             ));
         }
 
-        val outputFile = getOutputFile().get().getAsFile();
+        var outputFile = getOutputFile().get().getAsFile();
 
         move(
             generatedFile.toPath(),

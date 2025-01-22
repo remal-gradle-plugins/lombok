@@ -5,7 +5,6 @@ import static name.remal.gradle_plugins.lombok.config.LombokConfig.LOMBOK_CONFIG
 import static name.remal.gradle_plugins.lombok.config.rule.DocUtils.PLUGIN_REPOSITORY_HTML_URL;
 
 import com.google.auto.service.AutoService;
-import lombok.val;
 import name.remal.gradle_plugins.lombok.config.LombokConfig;
 
 @AutoService(LombokConfigRule.class)
@@ -13,10 +12,10 @@ public class StopBubblingAtRoot implements LombokConfigRule {
 
     @Override
     public void validate(LombokConfig config, LombokConfigValidationContext context) {
-        val rootPath = context.getRootPath();
-        val rootLombokConfigPath = rootPath.resolve(LOMBOK_CONFIG_FILE_NAME);
+        var rootPath = context.getRootPath();
+        var rootLombokConfigPath = rootPath.resolve(LOMBOK_CONFIG_FILE_NAME);
 
-        val rootConfigFile = config.getConfigFiles().stream()
+        var rootConfigFile = config.getConfigFiles().stream()
             .filter(it -> rootLombokConfigPath.equals(it.getFile().getFileSystemPath()))
             .findFirst()
             .orElse(null);

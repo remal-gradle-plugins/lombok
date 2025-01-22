@@ -11,7 +11,6 @@ import com.google.common.base.Splitter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import lombok.NoArgsConstructor;
-import lombok.val;
 
 @NoArgsConstructor(access = PRIVATE)
 abstract class ImportInstructionResolver {
@@ -33,7 +32,7 @@ abstract class ImportInstructionResolver {
                 .build();
         }
 
-        val valueParts = Splitter.on('!').splitToList(value);
+        var valueParts = Splitter.on('!').splitToList(value);
         if (valueParts.size() > 2) {
             return ResolvedImportError.builderFor(instruction)
                 .message("Import path must not have multiple '!': " + value)
@@ -45,13 +44,13 @@ abstract class ImportInstructionResolver {
             file = getHomeDirPath() + file.substring(1);
         }
 
-        for (val envEntry : getEnvVars().entrySet()) {
+        for (var envEntry : getEnvVars().entrySet()) {
             file = file.replace('<' + envEntry.getKey() + '>', envEntry.getValue());
         }
 
 
-        val instructionFile = instruction.getFile();
-        val fileSystemPath = instructionFile.getFileSystemPath();
+        var instructionFile = instruction.getFile();
+        var fileSystemPath = instructionFile.getFileSystemPath();
 
         Path filePath = fileSystemPath.getFileSystem().getPath(file);
         if (file.startsWith("/")) {
@@ -65,10 +64,10 @@ abstract class ImportInstructionResolver {
                     .build();
             }
 
-            val instructionArchiveFile = (LombokConfigPathArchive) instructionFile;
-            val entryName = instructionArchiveFile.getEntryName();
-            val entryFilePath = getDirPathOf(Paths.get(entryName));
-            val entryPath = entryFilePath.resolve(filePath).normalize();
+            var instructionArchiveFile = (LombokConfigPathArchive) instructionFile;
+            var entryName = instructionArchiveFile.getEntryName();
+            var entryFilePath = getDirPathOf(Paths.get(entryName));
+            var entryPath = entryFilePath.resolve(filePath).normalize();
             if (entryPath.toString().isEmpty()) {
                 return ResolvedImportFile.builderFor(instruction)
                     .fileToImport(
@@ -92,7 +91,7 @@ abstract class ImportInstructionResolver {
 
 
         final LombokConfigPath fileToImport;
-        val targetFilePath = normalizePath(getDirPathOf(fileSystemPath).resolve(filePath));
+        var targetFilePath = normalizePath(getDirPathOf(fileSystemPath).resolve(filePath));
         if (file.endsWith(".zip")
             || file.endsWith(".jar")
         ) {
@@ -117,7 +116,7 @@ abstract class ImportInstructionResolver {
 
     @VisibleForTesting
     static Path getDirPathOf(Path path) {
-        val parentPath = path.getParent();
+        var parentPath = path.getParent();
         if (parentPath != null && !parentPath.equals(path)) {
             return parentPath;
         }
@@ -126,9 +125,9 @@ abstract class ImportInstructionResolver {
             return path;
         }
 
-        val pathString = path.toString();
+        var pathString = path.toString();
         if (!pathString.isEmpty()) {
-            val firstChar = pathString.charAt(0);
+            var firstChar = pathString.charAt(0);
             if (firstChar == '/' || firstChar == '\\') {
                 return Paths.get("/");
             }

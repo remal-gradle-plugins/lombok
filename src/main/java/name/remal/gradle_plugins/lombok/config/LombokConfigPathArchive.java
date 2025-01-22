@@ -13,7 +13,6 @@ import javax.annotation.Nullable;
 import javax.annotation.meta.When;
 import lombok.SneakyThrows;
 import lombok.Value;
-import lombok.val;
 
 @Value
 public class LombokConfigPathArchive implements LombokConfigPath {
@@ -39,7 +38,7 @@ public class LombokConfigPathArchive implements LombokConfigPath {
     @Override
     @SneakyThrows
     public String readContent() {
-        val content = forEntry(stream ->
+        var content = forEntry(stream ->
             stream != null
                 ? new String(toByteArray(stream), UTF_8)
                 : null
@@ -60,12 +59,13 @@ public class LombokConfigPathArchive implements LombokConfigPath {
 
     @SneakyThrows
     @Nonnull(when = When.UNKNOWN)
+    @SuppressWarnings("java:S5042")
     private <T> T forEntry(EntryProcessor<T> action) {
-        val entryNameToFind = getEntryName();
-        try (val stream = newInputStream(getArchivePath())) {
-            try (val zipStream = new ZipInputStream(stream, UTF_8)) {
+        var entryNameToFind = getEntryName();
+        try (var stream = newInputStream(getArchivePath())) {
+            try (var zipStream = new ZipInputStream(stream, UTF_8)) {
                 while (true) {
-                    val entry = zipStream.getNextEntry();
+                    var entry = zipStream.getNextEntry();
                     if (entry == null) {
                         return action.process(null);
                     }

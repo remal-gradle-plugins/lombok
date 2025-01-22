@@ -11,7 +11,6 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.nio.file.Paths;
-import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +21,7 @@ class ImportInstructionResolverTest {
 
     @BeforeEach
     void beforeEach() {
-        val currentFile = mock(LombokConfigPathSystem.class, CALLS_REAL_METHODS);
+        var currentFile = mock(LombokConfigPathSystem.class, CALLS_REAL_METHODS);
         lenient().when(currentFile.getPath()).thenReturn(normalizePath(Paths.get("/root/some/inner/dir/file")));
 
         lenient().when(instruction.getFile()).thenReturn(currentFile);
@@ -55,11 +54,11 @@ class ImportInstructionResolverTest {
 
     @Test
     void userHomeSubstitution() {
-        val currentFile = mock(LombokConfigPathSystem.class, CALLS_REAL_METHODS);
+        var currentFile = mock(LombokConfigPathSystem.class, CALLS_REAL_METHODS);
         when(instruction.getFile()).thenReturn(currentFile);
         when(currentFile.getPath()).thenReturn(normalizePath(Paths.get("/root/dir/file")));
 
-        try (val systemProviders = mockStatic(SystemProviders.class)) {
+        try (var systemProviders = mockStatic(SystemProviders.class)) {
             systemProviders.when(SystemProviders::getHomeDirPath).thenReturn("/home");
 
             when(instruction.getValue()).thenReturn("~/file");
@@ -78,12 +77,12 @@ class ImportInstructionResolverTest {
 
     @Test
     void envVarSubstitution() {
-        val currentFile = mock(LombokConfigPathSystem.class, CALLS_REAL_METHODS);
+        var currentFile = mock(LombokConfigPathSystem.class, CALLS_REAL_METHODS);
         when(instruction.getFile()).thenReturn(currentFile);
         when(currentFile.getPath()).thenReturn(normalizePath(Paths.get("/root/dir/file")));
 
-        try (val systemProviders = mockStatic(SystemProviders.class)) {
-            val varName = "__TEST_VAR__" + System.nanoTime();
+        try (var systemProviders = mockStatic(SystemProviders.class)) {
+            var varName = "__TEST_VAR__" + System.nanoTime();
             systemProviders.when(SystemProviders::getEnvVars).thenReturn(singletonMap(varName, "dir"));
 
             when(instruction.getValue()).thenReturn("/root/<" + varName + ">/file");
@@ -102,7 +101,7 @@ class ImportInstructionResolverTest {
 
     @Test
     void absoluteInArchive() {
-        val archiveFile = mock(LombokConfigPathArchive.class, CALLS_REAL_METHODS);
+        var archiveFile = mock(LombokConfigPathArchive.class, CALLS_REAL_METHODS);
         when(instruction.getFile()).thenReturn(archiveFile);
         when(archiveFile.getArchivePath()).thenReturn(normalizePath(Paths.get("/root/archive.zip")));
         when(archiveFile.getEntryName()).thenReturn("entry");
@@ -115,7 +114,7 @@ class ImportInstructionResolverTest {
 
     @Test
     void outOfArchive() {
-        val archiveFile = mock(LombokConfigPathArchive.class, CALLS_REAL_METHODS);
+        var archiveFile = mock(LombokConfigPathArchive.class, CALLS_REAL_METHODS);
         when(instruction.getFile()).thenReturn(archiveFile);
         when(archiveFile.getArchivePath()).thenReturn(normalizePath(Paths.get("/root/archive.zip")));
         when(archiveFile.getEntryName()).thenReturn("entry");
@@ -128,7 +127,7 @@ class ImportInstructionResolverTest {
 
     @Test
     void rootOfArchive() {
-        val archiveFile = mock(LombokConfigPathArchive.class, CALLS_REAL_METHODS);
+        var archiveFile = mock(LombokConfigPathArchive.class, CALLS_REAL_METHODS);
         when(instruction.getFile()).thenReturn(archiveFile);
         when(archiveFile.getArchivePath()).thenReturn(normalizePath(Paths.get("/root/archive.zip")));
         when(archiveFile.getEntryName()).thenReturn("entry");
@@ -154,7 +153,7 @@ class ImportInstructionResolverTest {
 
     @Test
     void relativeInArchive() {
-        val archiveFile = mock(LombokConfigPathArchive.class, CALLS_REAL_METHODS);
+        var archiveFile = mock(LombokConfigPathArchive.class, CALLS_REAL_METHODS);
         when(instruction.getFile()).thenReturn(archiveFile);
         when(archiveFile.getArchivePath()).thenReturn(normalizePath(Paths.get("/root/archive.zip")));
         when(archiveFile.getEntryName()).thenReturn("root/entry");
@@ -237,7 +236,7 @@ class ImportInstructionResolverTest {
 
     @Test
     void relativeArchive() {
-        val currentFile = mock(LombokConfigPathSystem.class, CALLS_REAL_METHODS);
+        var currentFile = mock(LombokConfigPathSystem.class, CALLS_REAL_METHODS);
         when(instruction.getFile()).thenReturn(currentFile);
         when(currentFile.getPath()).thenReturn(normalizePath(Paths.get("/root/dir/file")));
 
@@ -262,7 +261,7 @@ class ImportInstructionResolverTest {
 
     @Test
     void relativeArchiveWithEntry() {
-        val currentFile = mock(LombokConfigPathSystem.class, CALLS_REAL_METHODS);
+        var currentFile = mock(LombokConfigPathSystem.class, CALLS_REAL_METHODS);
         when(instruction.getFile()).thenReturn(currentFile);
         when(currentFile.getPath()).thenReturn(normalizePath(Paths.get("/root/dir/file")));
 
@@ -287,7 +286,7 @@ class ImportInstructionResolverTest {
 
     @Test
     void relative() {
-        val currentFile = mock(LombokConfigPathSystem.class, CALLS_REAL_METHODS);
+        var currentFile = mock(LombokConfigPathSystem.class, CALLS_REAL_METHODS);
         when(instruction.getFile()).thenReturn(currentFile);
         when(currentFile.getPath()).thenReturn(normalizePath(Paths.get("/root/dir/file")));
 

@@ -7,7 +7,6 @@ import static name.remal.gradle_plugins.toolkit.PredicateUtils.endsWithString;
 import static name.remal.gradle_plugins.toolkit.PredicateUtils.startsWithString;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import lombok.val;
 import name.remal.gradle_plugins.lombok.config.LombokConfigurationKey;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +15,7 @@ class AddGeneratedAnnotationTest {
     @Test
     @SuppressWarnings("java:S3415")
     void allConfigKeysSupported() {
-        val addGeneratedAnnotationCurrentConfigKeys = getAllLombokConfigurationKeys().stream()
+        var addGeneratedAnnotationCurrentConfigKeys = getAllLombokConfigurationKeys().stream()
             .map(LombokConfigurationKey::getName)
             .filter(startsWithString("lombok.add"))
             .filter(endsWithString("GeneratedAnnotation"))

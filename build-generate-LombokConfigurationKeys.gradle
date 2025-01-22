@@ -36,17 +36,16 @@ generateSources.forMainSourceSet.java {
     classFile("${project.calculateBaseJavaPackage()}.config", 'LombokConfigurationKeys') {
         addStaticImport("lombok.AccessLevel", "PRIVATE")
 
-        addImport("com.google.common.collect.ImmutableList")
         addImport("java.util.List")
         addImport("javax.annotation.Nullable")
         addImport("lombok.NoArgsConstructor")
         addImport("lombok.val")
 
         line("@NoArgsConstructor(access = PRIVATE)")
-        suppressWarningsLine("checkstyle:LineLength", "checkstyle:RightCurlyAlone")
+        suppressWarningsLine("checkstyle:LineLength", "checkstyle:RightCurlyAlone", "checkstyle:SeparatorWrapComma")
         block("public abstract class ${simpleName}") { classContent ->
             line("")
-            line("private static final List<LombokConfigurationKey> KEYS = ImmutableList.<LombokConfigurationKey>builder()")
+            line("private static final List<LombokConfigurationKey> KEYS = List.of(")
 
             FileTree lombokSourcesTree = injections.objects.fileCollection().asFileTree
             configurations.lombokSources.files.forEach { File file ->
@@ -97,14 +96,15 @@ generateSources.forMainSourceSet.java {
 
                         boolean isDeprecated = field.annotations.any { it.name.identifier == 'Deprecated' }
 
-                        classContent.line("    .add(LombokConfigurationKey.builder()")
+                        String delim = foundLombokConfigProperties.size() == 1 ? '' : ','
+
+                        classContent.line("    ${delim}LombokConfigurationKey.builder()")
                         classContent.line("        .name(\"${classContent.escapeString(configKey)}\")")
                         classContent.line("        .description(${initializer.getArgument(1)})")
                         if (isDeprecated) {
                             classContent.line("        .deprecated(true)")
                         }
                         classContent.line("        .build()")
-                        classContent.line("    )")
 
                         return super.visit(field, arg)
                     }
@@ -123,7 +123,7 @@ generateSources.forMainSourceSet.java {
                 }
             }
 
-            line("    .build();")
+            line("    );")
 
             line("")
             line("@Nullable")

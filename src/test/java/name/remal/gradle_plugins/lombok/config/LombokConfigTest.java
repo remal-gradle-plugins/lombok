@@ -16,7 +16,6 @@ import com.google.common.jimfs.Jimfs;
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import lombok.SneakyThrows;
-import lombok.val;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -55,7 +54,7 @@ class LombokConfigTest {
             "config.stopBubbling = false"
         ).getBytes(UTF_8));
 
-        val lombokConfig = new LombokConfig(configAbc);
+        var lombokConfig = new LombokConfig(configAbc);
         assertThat(lombokConfig.getInvolvedPaths())
             .as("involvedPaths")
             .containsExactly(
@@ -88,7 +87,7 @@ class LombokConfigTest {
             ""
         ).getBytes(UTF_8));
 
-        val lombokConfig = new LombokConfig(configA);
+        var lombokConfig = new LombokConfig(configA);
         assertThat(lombokConfig.getInvolvedPaths())
             .as("involvedPaths")
             .containsExactly(
@@ -127,7 +126,7 @@ class LombokConfigTest {
             ""
         ).getBytes(UTF_8));
 
-        val lombokConfig = new LombokConfig(configAbc);
+        var lombokConfig = new LombokConfig(configAbc);
         assertThat(lombokConfig.getInvolvedPaths())
             .as("involvedPaths")
             .containsExactly(
@@ -162,7 +161,7 @@ class LombokConfigTest {
             "prop.a.b.c = abc"
         ).getBytes(UTF_8));
 
-        val lombokConfig = new LombokConfig(configAbc);
+        var lombokConfig = new LombokConfig(configAbc);
         assertThat(lombokConfig.get("prop.a"))
             .as("prop.a")
             .isNull();
@@ -205,7 +204,7 @@ class LombokConfigTest {
             "list -= cba"
         ).getBytes(UTF_8));
 
-        val lombokConfig = new LombokConfig(configAbc);
+        var lombokConfig = new LombokConfig(configAbc);
         assertThat(lombokConfig.getList("list"))
             .as("list")
             .containsExactly(
@@ -227,7 +226,7 @@ class LombokConfigTest {
             "clear prop"
         ).getBytes(UTF_8));
 
-        val lombokConfig = new LombokConfig(configAbc);
+        var lombokConfig = new LombokConfig(configAbc);
         assertThat(lombokConfig.getList("list"))
             .as("list")
             .isEmpty();
@@ -260,7 +259,7 @@ class LombokConfigTest {
             "list += abc"
         ).getBytes(UTF_8));
 
-        val lombokConfig = new LombokConfig(configAbc);
+        var lombokConfig = new LombokConfig(configAbc);
         assertThat(lombokConfig.getProperties())
             .as("allProperties")
             .containsExactly(

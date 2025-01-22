@@ -11,7 +11,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.stream.Stream;
-import lombok.val;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -21,19 +20,19 @@ class AnnotationProcessorsLombokOrderUtilsTest {
     @ParameterizedTest
     @MethodSource("fileOrderParams")
     void fileOrder(String nameLess, String nameGreater) {
-        val expectedFiles = Stream.of(nameLess, nameGreater)
+        var expectedFiles = Stream.of(nameLess, nameGreater)
             .map(name -> "/root/" + name)
             .map(File::new)
             .collect(toList());
 
-        val fixedFiles = withFixedAnnotationProcessorFilesOrder(expectedFiles);
+        var fixedFiles = withFixedAnnotationProcessorFilesOrder(expectedFiles);
         assertThat(fixedFiles).isEqualTo(expectedFiles);
 
 
-        val reverseFiles = new ArrayList<>(expectedFiles);
+        var reverseFiles = new ArrayList<>(expectedFiles);
         reverse(reverseFiles);
 
-        val fixedReverseFiles = withFixedAnnotationProcessorFilesOrder(reverseFiles);
+        var fixedReverseFiles = withFixedAnnotationProcessorFilesOrder(reverseFiles);
         assertThat(fixedReverseFiles).isEqualTo(expectedFiles);
     }
 
@@ -65,17 +64,17 @@ class AnnotationProcessorsLombokOrderUtilsTest {
     @ParameterizedTest
     @MethodSource("processorOrderParams")
     void processorOrder(String processorLess, String processorGreater) {
-        val expectedProcessors = Stream.of(processorLess, processorGreater)
+        var expectedProcessors = Stream.of(processorLess, processorGreater)
             .collect(toList());
 
-        val fixedProcessors = withFixedAnnotationProcessorsOrder(expectedProcessors);
+        var fixedProcessors = withFixedAnnotationProcessorsOrder(expectedProcessors);
         assertThat(fixedProcessors).isEqualTo(expectedProcessors);
 
 
-        val reverseProcessors = new ArrayList<>(expectedProcessors);
+        var reverseProcessors = new ArrayList<>(expectedProcessors);
         reverse(reverseProcessors);
 
-        val fixedReverseProcessors = withFixedAnnotationProcessorsOrder(reverseProcessors);
+        var fixedReverseProcessors = withFixedAnnotationProcessorsOrder(reverseProcessors);
         assertThat(fixedReverseProcessors).isEqualTo(expectedProcessors);
     }
 

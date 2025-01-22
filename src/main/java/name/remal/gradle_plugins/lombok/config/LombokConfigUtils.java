@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import name.remal.gradle_plugins.toolkit.FileUtils;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileTree;
@@ -35,9 +34,9 @@ public abstract class LombokConfigUtils {
             .collect(toList());
 
         Map<List<LombokConfigPath>, LombokConfig> lombokConfigMap = new LinkedHashMap<>();
-        for (val sourceDir : sourceDirs) {
-            val lombokConfig = new LombokConfig(sourceDir);
-            val lombokConfigFiles = lombokConfig.getConfigFiles().stream()
+        for (var sourceDir : sourceDirs) {
+            var lombokConfig = new LombokConfig(sourceDir);
+            var lombokConfigFiles = lombokConfig.getConfigFiles().stream()
                 .map(LombokConfigFile::getFile)
                 .collect(toList());
             lombokConfigMap.computeIfAbsent(lombokConfigFiles, __ -> lombokConfig);
@@ -47,14 +46,14 @@ public abstract class LombokConfigUtils {
     }
 
     public static List<LombokConfig> parseLombokConfigs(JavaCompile task) {
-        val extensions = task.getExtensions();
+        var extensions = task.getExtensions();
         LombokConfigs container = extensions.findByType(LombokConfigs.class);
         if (container == null) {
-            val dirs = Stream.concat(
+            var dirs = Stream.concat(
                 streamJavaCompileSourceDirs(task),
                 Stream.of(task.getProject().getProjectDir())
             ).collect(toList());
-            val configs = ImmutableList.copyOf(parseLombokConfigs(dirs));
+            var configs = ImmutableList.copyOf(parseLombokConfigs(dirs));
             container = new LombokConfigs(configs);
             extensions.add("lombok-configs-container", container);
         }
@@ -70,13 +69,13 @@ public abstract class LombokConfigUtils {
 
     @SuppressWarnings("ConstantConditions")
     public static Stream<File> streamJavaCompileSourceDirs(JavaCompile task) {
-        val sourceDirStream = Stream.of(task.getSource()).filter(Objects::nonNull)
+        var sourceDirStream = Stream.of(task.getSource()).filter(Objects::nonNull)
             .map(FileTree::getFiles).filter(Objects::nonNull)
             .flatMap(Collection::stream).filter(Objects::nonNull)
             .map(File::getAbsoluteFile)
             .map(File::getParentFile);
 
-        val generatedSourceDirStream = Stream.of(task.getOptions()).filter(Objects::nonNull)
+        var generatedSourceDirStream = Stream.of(task.getOptions()).filter(Objects::nonNull)
             .map(CompileOptions::getGeneratedSourceOutputDirectory).filter(Objects::nonNull)
             .map(DirectoryProperty::getAsFile).filter(Objects::nonNull)
             .map(Provider::getOrNull).filter(Objects::nonNull);

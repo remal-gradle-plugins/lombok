@@ -1,12 +1,10 @@
 package name.remal.gradle_plugins.lombok.config;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.nio.file.Files.readAllBytes;
+import static java.nio.file.Files.readString;
 
 import java.nio.file.Path;
 import lombok.SneakyThrows;
 import lombok.Value;
-import lombok.val;
 
 @Value
 public class LombokConfigPathSystem implements LombokConfigPath {
@@ -21,8 +19,7 @@ public class LombokConfigPathSystem implements LombokConfigPath {
     @Override
     @SneakyThrows
     public String readContent() {
-        val bytes = readAllBytes(getPath());
-        return new String(bytes, UTF_8);
+        return readString(getPath());
     }
 
     @Override

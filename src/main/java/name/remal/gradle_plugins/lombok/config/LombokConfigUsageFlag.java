@@ -1,7 +1,6 @@
 package name.remal.gradle_plugins.lombok.config;
 
 import javax.annotation.Nullable;
-import lombok.val;
 import org.jetbrains.annotations.Contract;
 
 public enum LombokConfigUsageFlag {
@@ -14,7 +13,7 @@ public enum LombokConfigUsageFlag {
     @Nullable
     @Contract("null->null")
     public static LombokConfigUsageFlag lombokConfigUsageFlagOf(@Nullable String value) {
-        for (val enumValue : values()) {
+        for (var enumValue : values()) {
             if (enumValue.name().equalsIgnoreCase(value)) {
                 return enumValue;
             }

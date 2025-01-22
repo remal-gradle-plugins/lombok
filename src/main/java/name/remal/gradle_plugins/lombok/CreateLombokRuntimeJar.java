@@ -1,7 +1,5 @@
 package name.remal.gradle_plugins.lombok;
 
-import static java.util.Collections.singletonList;
-
 import java.util.List;
 import org.gradle.api.tasks.CacheableTask;
 
@@ -14,7 +12,7 @@ public abstract class CreateLombokRuntimeJar extends BaseCreateLombokJar {
 
     @Override
     protected List<String> createArgs() {
-        return singletonList("--create");
+        return List.of("--create");
     }
 
     @Override

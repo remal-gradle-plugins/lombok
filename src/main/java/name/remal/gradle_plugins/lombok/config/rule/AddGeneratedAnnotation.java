@@ -5,17 +5,15 @@ import static name.remal.gradle_plugins.lombok.config.rule.DocUtils.PLUGIN_REPOS
 
 import com.google.auto.service.AutoService;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Objects;
-import lombok.val;
 import name.remal.gradle_plugins.lombok.config.LombokConfig;
 
 @AutoService(LombokConfigRule.class)
 public class AddGeneratedAnnotation implements LombokConfigRule {
 
     @VisibleForTesting
-    static final List<String> ADD_GENERATED_ANNOTATION_CONFIG_KEYS = ImmutableList.of(
+    static final List<String> ADD_GENERATED_ANNOTATION_CONFIG_KEYS = List.of(
         "lombok.addLombokGeneratedAnnotation",
         "lombok.addJakartaGeneratedAnnotation",
         "lombok.addJavaxGeneratedAnnotation",
@@ -24,7 +22,7 @@ public class AddGeneratedAnnotation implements LombokConfigRule {
 
     @Override
     public void validate(LombokConfig config, LombokConfigValidationContext context) {
-        val hasAddGeneratedAnnotationConfigKey = ADD_GENERATED_ANNOTATION_CONFIG_KEYS.stream()
+        var hasAddGeneratedAnnotationConfigKey = ADD_GENERATED_ANNOTATION_CONFIG_KEYS.stream()
             .map(config::getBoolean)
             .anyMatch(Objects::nonNull);
         if (hasAddGeneratedAnnotationConfigKey) {

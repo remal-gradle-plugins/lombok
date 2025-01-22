@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import lombok.NoArgsConstructor;
-import lombok.val;
 
 @NoArgsConstructor(access = PRIVATE)
 abstract class AnnotationProcessorsLombokOrderUtils {
@@ -40,15 +39,15 @@ abstract class AnnotationProcessorsLombokOrderUtils {
             return emptyList();
         }
 
-        val filesList = new ArrayList<>(files);
+        var filesList = new ArrayList<>(files);
         filesList.sort(comparing(AnnotationProcessorsLombokOrderUtils::getFileOrder));
         return unmodifiableList(filesList);
     }
 
     private static int getFileOrder(File file) {
-        val fileName = file.getName();
+        var fileName = file.getName();
 
-        for (val entry : FILE_NAME_ORDERS.entrySet()) {
+        for (var entry : FILE_NAME_ORDERS.entrySet()) {
             if (entry.getKey().matcher(fileName).matches()) {
                 return entry.getValue();
             }
@@ -63,13 +62,13 @@ abstract class AnnotationProcessorsLombokOrderUtils {
             return emptyList();
         }
 
-        val processorsList = new ArrayList<>(processors);
+        var processorsList = new ArrayList<>(processors);
         processorsList.sort(comparing(AnnotationProcessorsLombokOrderUtils::getProcessorOrder));
         return unmodifiableList(processorsList);
     }
 
     private static int getProcessorOrder(String processor) {
-        for (val entry : PROCESSOR_ORDERS.entrySet()) {
+        for (var entry : PROCESSOR_ORDERS.entrySet()) {
             if (entry.getKey().matcher(processor).matches()) {
                 return entry.getValue();
             }

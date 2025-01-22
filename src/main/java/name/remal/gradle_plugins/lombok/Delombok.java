@@ -3,7 +3,6 @@ package name.remal.gradle_plugins.lombok;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.write;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static name.remal.gradle_plugins.toolkit.PathUtils.createParentDirectories;
@@ -16,7 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import lombok.val;
 import name.remal.gradle_plugins.toolkit.ObjectUtils;
 import org.gradle.api.Action;
 import org.gradle.api.file.ConfigurableFileCollection;
@@ -40,7 +38,7 @@ public abstract class Delombok extends AbstractLombokTask {
     public Delombok() {
         super("delombok");
 
-        val project = getProject();
+        var project = getProject();
 
         getOutputDir().convention(
             project.getLayout().getBuildDirectory().dir(getName())
@@ -98,7 +96,7 @@ public abstract class Delombok extends AbstractLombokTask {
         getOutputDir().finalizeValue();
         args.add(String.format("--target=%s", getOutputDir().get().getAsFile().getAbsolutePath()));
 
-        val inputFiles = getInputFiles().getFiles().stream()
+        var inputFiles = getInputFiles().getFiles().stream()
             .filter(File::exists)
             .collect(toList());
         if (inputFiles.isEmpty()) {
@@ -109,20 +107,20 @@ public abstract class Delombok extends AbstractLombokTask {
             .forEach(args::add);
 
 
-        val argsFileContent = args.stream()
+        var argsFileContent = args.stream()
             .map(arg -> arg.replace("\\", "\\\\"))
             .map(arg -> arg.replace(" ", "\\ "))
             .collect(joining("\n"));
-        val argsFile = new File(getTemporaryDir(), getName() + ".args");
+        var argsFile = new File(getTemporaryDir(), getName() + ".args");
         write(createParentDirectories(argsFile.toPath()), argsFileContent.getBytes(UTF_8));
 
-        return singletonList('@' + argsFile.getAbsolutePath());
+        return List.of('@' + argsFile.getAbsolutePath());
     }
 
     @Override
     @SneakyThrows
     protected void beforeExecute(JavaExecSpec execSpec) {
-        val outputDir = getOutputDir().get().getAsFile();
+        var outputDir = getOutputDir().get().getAsFile();
         deleteRecursively(outputDir.toPath());
         createDirectories(outputDir.toPath());
     }

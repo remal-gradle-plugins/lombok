@@ -1,22 +1,20 @@
 package name.remal.gradle_plugins.lombok;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toUnmodifiableList;
 import static lombok.AccessLevel.PRIVATE;
 
-import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nullable;
 import lombok.NoArgsConstructor;
-import lombok.val;
 import org.gradle.api.JavaVersion;
 
 @NoArgsConstructor(access = PRIVATE)
 public abstract class JavacPackagesToOpenUtils {
 
-    private static final List<String> JAVAC_PACKAGES_TO_OPEN = ImmutableList.of(
+    private static final List<String> JAVAC_PACKAGES_TO_OPEN = List.of(
     /*
     "jdk.compiler/com.sun.tools.javac.code",
     "jdk.compiler/com.sun.tools.javac.comp",
@@ -30,10 +28,9 @@ public abstract class JavacPackagesToOpenUtils {
     */
     );
 
-    private static final List<String> JAVAC_PACKAGE_OPEN_JVM_ARGS = ImmutableList.copyOf(JAVAC_PACKAGES_TO_OPEN.stream()
+    private static final List<String> JAVAC_PACKAGE_OPEN_JVM_ARGS = JAVAC_PACKAGES_TO_OPEN.stream()
         .map(it -> format("--add-opens=%s=ALL-UNNAMED", it))
-        .collect(toList())
-    );
+        .collect(toUnmodifiableList());
 
     public static boolean shouldJavacPackageOpenJvmArgsBeAdded(JavaVersion javaVersion) {
         return javaVersion.isJava9Compatible();
@@ -49,7 +46,7 @@ public abstract class JavacPackagesToOpenUtils {
             result.addAll(args);
         }
 
-        for (val jvmArg : getJavacPackageOpenJvmArgs()) {
+        for (var jvmArg : getJavacPackageOpenJvmArgs()) {
             if (!result.contains(jvmArg)) {
                 result.add(jvmArg);
             }

@@ -13,7 +13,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
-import lombok.val;
 import org.jetbrains.annotations.Unmodifiable;
 
 interface WithProperties {
@@ -24,7 +23,7 @@ interface WithProperties {
 
     @Nullable
     default String get(String key) {
-        val property = getProperties().stream()
+        var property = getProperties().stream()
             .filter(byLombokConfigKey(key))
             .reduce((first, second) -> second)
             .orElse(null);
@@ -37,31 +36,31 @@ interface WithProperties {
     }
 
     default String get(String key, String defaultValue) {
-        val value = get(key);
+        var value = get(key);
         return value != null ? value : defaultValue;
     }
 
 
     @Nullable
     default Boolean getBoolean(String key) {
-        val value = get(key);
+        var value = get(key);
         return value != null ? parseBoolean(value) : null;
     }
 
     default boolean getBoolean(String key, boolean defaultValue) {
-        val value = getBoolean(key);
+        var value = getBoolean(key);
         return value != null ? value : defaultValue;
     }
 
 
     @Nullable
     default LombokConfigUsageFlag getUsageFlag(String key) {
-        val value = get(key);
+        var value = get(key);
         return value != null ? lombokConfigUsageFlagOf(value) : null;
     }
 
     default LombokConfigUsageFlag getUsageFlag(String key, LombokConfigUsageFlag defaultValue) {
-        val value = getUsageFlag(key);
+        var value = getUsageFlag(key);
         return value != null ? value : defaultValue;
     }
 
@@ -72,7 +71,7 @@ interface WithProperties {
         getProperties().stream()
             .filter(byLombokConfigKey(key))
             .forEach(property -> {
-                val operator = property.getOperator();
+                var operator = property.getOperator();
                 if (operator == PLUS) {
                     result.add(property.getValue());
                 } else if (operator == MINUS) {

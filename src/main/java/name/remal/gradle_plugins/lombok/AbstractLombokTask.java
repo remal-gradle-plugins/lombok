@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.inject.Inject;
-import lombok.val;
 import name.remal.gradle_plugins.toolkit.JavaInstallationMetadataUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.JavaVersion;
@@ -67,8 +66,8 @@ public abstract class AbstractLombokTask extends DefaultTask {
         AtomicReference<JavaExecSpec> execSpecRef = new AtomicReference<>();
 
         getExecOperations().javaexec(execSpec -> {
-            val javaLauncher = getJavaLauncher().get();
-            val javaVersion = Optional.of(javaLauncher.getMetadata())
+            var javaLauncher = getJavaLauncher().get();
+            var javaVersion = Optional.of(javaLauncher.getMetadata())
                 .map(JavaInstallationMetadataUtils::getJavaInstallationVersionOf)
                 .orElseGet(JavaVersion::current);
             if (shouldJavacPackageOpenJvmArgsBeAdded(javaVersion)) {

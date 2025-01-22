@@ -9,7 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import lombok.val;
 import org.junit.jupiter.api.Test;
 
 class LombokConfigFileParserTest {
@@ -24,7 +23,7 @@ class LombokConfigFileParserTest {
             "importgg"
         ));
 
-        val configFile = LombokConfigFileParser.parseLombokConfigFileImpl(file);
+        var configFile = LombokConfigFileParser.parseLombokConfigFileImpl(file);
         assertThat(configFile.getImportInstructions())
             .as("importInstruction")
             .isEmpty();
@@ -51,7 +50,7 @@ class LombokConfigFileParserTest {
             "import gg"
         ));
 
-        val configFile = LombokConfigFileParser.parseLombokConfigFileImpl(file);
+        var configFile = LombokConfigFileParser.parseLombokConfigFileImpl(file);
         assertThat(configFile.getImportInstructions())
             .as("importInstruction")
             .containsExactly(ImportInstruction.builder()

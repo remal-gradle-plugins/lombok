@@ -12,7 +12,6 @@ import static name.remal.gradle_plugins.toolkit.StringUtils.substringBefore;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.regex.Pattern;
 import lombok.NoArgsConstructor;
-import lombok.val;
 import name.remal.gradle_plugins.toolkit.cache.ToolkitCache;
 import name.remal.gradle_plugins.toolkit.cache.ToolkitCacheBuilder;
 
@@ -26,8 +25,8 @@ abstract class LombokConfigFileParser {
 
     private static final Pattern NEW_LINE = Pattern.compile("(?:\\r\\n)|(?:\\n\\r)|(?:\\n)|(?:\\r)");
 
-    private static final Pattern PROPERTY = Pattern.compile("(?:clear\\s+([^=]+))|(?:(\\S*?)\\s*([-+]?=)\\s*(.*?))");
-    private static final Pattern IMPORT = Pattern.compile("import\\s+(.+?)");
+    private static final Pattern PROPERTY = Pattern.compile("(?:clear\\s+([^=]+))|(?:(\\S*?)\\s*([-+]?=)\\s*(.*))");
+    private static final Pattern IMPORT = Pattern.compile("import\\s+(.+)");
 
 
     private static final ToolkitCache<LombokConfigPath, LombokConfigFile> PARSE_CACHE =
@@ -44,20 +43,20 @@ abstract class LombokConfigFileParser {
     @VisibleForTesting
     @SuppressWarnings("StringSplitter")
     static LombokConfigFile parseLombokConfigFileImpl(LombokConfigPath file) {
-        val lombokConfigFileBuilder = LombokConfigFile.builder().file(file);
+        var lombokConfigFileBuilder = LombokConfigFile.builder().file(file);
 
-        val content = file.readContent();
-        val lines = NEW_LINE.split(content);
+        var content = file.readContent();
+        var lines = NEW_LINE.split(content);
         for (int lineNumber = 1; lineNumber <= lines.length; ++lineNumber) {
             String originalLine = lines[lineNumber - 1];
-            val line = substringBefore(originalLine, "#").trim();
+            var line = substringBefore(originalLine, "#").trim();
             if (line.isEmpty()) {
                 continue;
             }
 
-            val importMatcher = IMPORT.matcher(line);
+            var importMatcher = IMPORT.matcher(line);
             if (importMatcher.matches()) {
-                val importInstruction = ImportInstruction.builder()
+                var importInstruction = ImportInstruction.builder()
                     .file(file)
                     .lineNumber(lineNumber)
                     .value(importMatcher.group(1))
@@ -66,12 +65,12 @@ abstract class LombokConfigFileParser {
                 continue;
             }
 
-            val propertyMatcher = PROPERTY.matcher(line);
+            var propertyMatcher = PROPERTY.matcher(line);
             if (propertyMatcher.matches()) {
                 if (propertyMatcher.group(1) == null) {
-                    val key = normalizeLombokConfigKey(propertyMatcher.group(2));
-                    val operatorString = propertyMatcher.group(3);
-                    val value = propertyMatcher.group(4);
+                    var key = normalizeLombokConfigKey(propertyMatcher.group(2));
+                    var operatorString = propertyMatcher.group(3);
+                    var value = propertyMatcher.group(4);
 
                     final LombokConfigPropertyOperator operator;
                     switch (operatorString) {
@@ -104,7 +103,7 @@ abstract class LombokConfigFileParser {
                     );
 
                 } else {
-                    val key = normalizeLombokConfigKey(propertyMatcher.group(1));
+                    var key = normalizeLombokConfigKey(propertyMatcher.group(1));
                     lombokConfigFileBuilder.property(LombokConfigFileProperty.builder()
                         .key(key)
                         .operator(CLEAR)

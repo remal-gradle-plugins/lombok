@@ -6,7 +6,6 @@ import static name.remal.gradle_plugins.toolkit.testkit.ProjectValidations.execu
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import name.remal.gradle_plugins.toolkit.testkit.TaskValidations;
 import org.gradle.api.Project;
 import org.junit.jupiter.api.Test;
@@ -18,13 +17,13 @@ class LombokPluginTest {
 
     @Test
     void applyPlugin() {
-        val pluginManager = project.getPluginManager();
+        var pluginManager = project.getPluginManager();
         assertDoesNotThrow(() -> pluginManager.apply(LombokPlugin.class));
     }
 
     @Test
     void applyPluginWithJava() {
-        val pluginManager = project.getPluginManager();
+        var pluginManager = project.getPluginManager();
         assertDoesNotThrow(() -> pluginManager.apply(LombokPlugin.class));
         assertDoesNotThrow(() -> pluginManager.apply("java"));
     }
@@ -36,10 +35,10 @@ class LombokPluginTest {
 
         executeAfterEvaluateActions(project);
 
-        val taskClassNamePrefix = packageNameOf(LombokPlugin.class) + '.';
+        var taskClassNamePrefix = packageNameOf(LombokPlugin.class) + '.';
         project.getTasks().stream()
             .filter(task -> {
-                val taskClass = unwrapGeneratedSubclass(task.getClass());
+                var taskClass = unwrapGeneratedSubclass(task.getClass());
                 return taskClass.getName().startsWith(taskClassNamePrefix);
             })
             .map(TaskValidations::markTaskDependenciesAsSkipped)

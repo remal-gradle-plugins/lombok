@@ -8,7 +8,6 @@ import static name.remal.gradle_plugins.toolkit.reflection.ReflectionUtils.isGet
 import java.util.ArrayList;
 import java.util.List;
 import lombok.SneakyThrows;
-import lombok.val;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 
@@ -61,15 +60,15 @@ public abstract class DelombokFormat {
     List<String> toArgs() {
         List<String> args = new ArrayList<>();
 
-        for (val method : DelombokFormat.class.getMethods()) {
+        for (var method : DelombokFormat.class.getMethods()) {
             if (isGetterOf(method, Property.class)) {
-                val property = (Property<?>) method.invoke(this);
+                var property = (Property<?>) method.invoke(this);
                 Object value = property.getOrNull();
                 if (value == null) {
                     continue;
                 }
 
-                val name = getPropertyNameForGetter(method);
+                var name = getPropertyNameForGetter(method);
 
                 if (value instanceof Boolean) {
                     if (TRUE.equals(value)) {
@@ -90,13 +89,13 @@ public abstract class DelombokFormat {
     @SneakyThrows
     @SuppressWarnings("unchecked")
     void convention(DelombokFormat other) {
-        for (val method : DelombokFormat.class.getMethods()) {
+        for (var method : DelombokFormat.class.getMethods()) {
             if (!isGetterOf(method, Property.class)) {
                 continue;
             }
 
-            val thisProperty = (Property<Object>) method.invoke(this);
-            val otherProperty = (Property<Object>) method.invoke(other);
+            var thisProperty = (Property<Object>) method.invoke(this);
+            var otherProperty = (Property<Object>) method.invoke(other);
             if (thisProperty != null && otherProperty != null) {
                 thisProperty.convention(otherProperty);
             }

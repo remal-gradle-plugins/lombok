@@ -23,7 +23,6 @@ import java.util.ServiceLoader;
 import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.val;
 import name.remal.gradle_plugins.lombok.config.rule.LombokConfigRule;
 import name.remal.gradle_plugins.lombok.config.rule.LombokConfigValidationContext;
 import name.remal.gradle_plugins.toolkit.issues.CheckstyleHtmlIssuesRenderer;
@@ -109,11 +108,11 @@ public abstract class ValidateLombokConfig
     @TaskAction
     @SuppressWarnings("Slf4jFormatShouldBeConst")
     public void execute() {
-        val lombokConfigs = getLombokConfigs().get();
+        var lombokConfigs = getLombokConfigs().get();
 
-        val disabledRules = getDisabledRules().get();
+        var disabledRules = getDisabledRules().get();
 
-        val rules = stream(
+        var rules = stream(
             ServiceLoader.load(LombokConfigRule.class, LombokConfigRule.class.getClassLoader()).spliterator(),
             false
         )
@@ -122,22 +121,22 @@ public abstract class ValidateLombokConfig
             .collect(toList());
 
 
-        val context = new Context();
-        for (val lombokConfig : lombokConfigs) {
-            for (val rule : rules) {
+        var context = new Context();
+        for (var lombokConfig : lombokConfigs) {
+            for (var rule : rules) {
                 rule.validate(lombokConfig, context);
             }
         }
 
 
-        val issues = context.getIssues();
+        var issues = context.getIssues();
 
-        val xmlReportLocation = getReports().getXml().getOutputLocation().getAsFile().getOrNull();
+        var xmlReportLocation = getReports().getXml().getOutputLocation().getAsFile().getOrNull();
         if (xmlReportLocation != null) {
             new CheckstyleXmlIssuesRenderer().renderIssuesToFile(issues, xmlReportLocation);
         }
 
-        val htmlReportLocation = getReports().getHtml().getOutputLocation().getAsFile().getOrNull();
+        var htmlReportLocation = getReports().getHtml().getOutputLocation().getAsFile().getOrNull();
         if (htmlReportLocation != null) {
             new CheckstyleHtmlIssuesRenderer().renderIssuesToFile(issues, htmlReportLocation);
         }
@@ -159,7 +158,7 @@ public abstract class ValidateLombokConfig
     protected abstract DirectoryProperty getRootDir();
 
     {
-        val project = getProject();
+        var project = getProject();
         getRootDir().set(project.getLayout().dir(project.provider(() ->
             getRootDirOf(project)
         )));

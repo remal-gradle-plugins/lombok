@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.Getter;
 import lombok.ToString;
-import lombok.val;
 import org.jetbrains.annotations.Unmodifiable;
 
 @ToString(of = "dir")
@@ -86,9 +85,9 @@ public class LombokConfig implements WithProperties {
 
     private List<LombokConfigFile> resolveConfigFiles() {
         List<LombokConfigFile> result = new ArrayList<>();
-        val isStopped = new AtomicBoolean(false);
+        var isStopped = new AtomicBoolean(false);
         for (Path currentDir = dir; currentDir != null; currentDir = currentDir.getParent()) {
-            val file = currentDir.resolve(LOMBOK_CONFIG_FILE_NAME);
+            var file = currentDir.resolve(LOMBOK_CONFIG_FILE_NAME);
             if (exists(file)) {
                 processFile(isStopped, result, new LombokConfigPathSystem(file), emptyList());
                 if (isStopped.get()) {
@@ -124,8 +123,8 @@ public class LombokConfig implements WithProperties {
             .map(ResolvedImportFile.class::cast)
             .collect(toCollection(ArrayList::new));
         reverse(resolvedImports);
-        for (val resolvedImport : resolvedImports) {
-            val currentImportTrace = new ArrayList<>(importTrace);
+        for (var resolvedImport : resolvedImports) {
+            var currentImportTrace = new ArrayList<>(importTrace);
             currentImportTrace.add(ImportTraceElement.builderFor(resolvedImport).build());
 
             processFile(isStopped, result, resolvedImport.getFileToImport(), unmodifiableList(currentImportTrace));

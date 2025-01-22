@@ -137,6 +137,11 @@ If there is a compatibility issue and the Lombok annotation processor has to be 
 
 # Migration guide
 
+## Version 2.* to 3.*
+
+The minimum Java version is 11 (from 8).
+The minimum Gradle version is 7.0 (from 6.7).
+
 ## Version 1.* to 2.*
 
 * Package name was changed from `name.remal.gradleplugins.lombok` to `name.remal.gradle_plugins.lombok`.
