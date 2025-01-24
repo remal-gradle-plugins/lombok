@@ -1,7 +1,7 @@
 package name.remal.gradle_plugins.lombok.config.rule;
 
 import static java.lang.String.format;
-import static name.remal.gradle_plugins.lombok.config.rule.DocUtils.PLUGIN_REPOSITORY_HTML_URL;
+import static name.remal.gradle_plugins.build_time_constants.api.BuildTimeConstants.getStringProperty;
 
 import com.google.auto.service.AutoService;
 import com.google.common.annotations.VisibleForTesting;
@@ -32,7 +32,7 @@ public class AddGeneratedAnnotation implements LombokConfigRule {
         context.report(getName(), config.getPath(), format(
             "Configure `lombok.addLombokGeneratedAnnotation` or `lombok.addJavaxGeneratedAnnotation`."
                 + " See %s/blob/main/config-rules/AddGeneratedAnnotation.md",
-            PLUGIN_REPOSITORY_HTML_URL
+            getStringProperty("repository.html-url")
         ));
     }
 

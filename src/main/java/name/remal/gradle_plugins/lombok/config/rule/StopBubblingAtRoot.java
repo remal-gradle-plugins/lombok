@@ -1,8 +1,8 @@
 package name.remal.gradle_plugins.lombok.config.rule;
 
 import static java.lang.String.format;
+import static name.remal.gradle_plugins.build_time_constants.api.BuildTimeConstants.getStringProperty;
 import static name.remal.gradle_plugins.lombok.config.LombokConfig.LOMBOK_CONFIG_FILE_NAME;
-import static name.remal.gradle_plugins.lombok.config.rule.DocUtils.PLUGIN_REPOSITORY_HTML_URL;
 
 import com.google.auto.service.AutoService;
 import name.remal.gradle_plugins.lombok.config.LombokConfig;
@@ -26,7 +26,7 @@ public class StopBubblingAtRoot implements LombokConfigRule {
                     + " Create such a file with `config.stopBubbling = true` line to make the build system independent."
                     + " See %s/blob/main/config-rules/StopBubblingAtRoot.md",
                 LOMBOK_CONFIG_FILE_NAME,
-                PLUGIN_REPOSITORY_HTML_URL
+                getStringProperty("repository.html-url")
             ));
         }
 

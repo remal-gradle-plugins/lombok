@@ -138,7 +138,7 @@ public abstract class ValidateLombokConfig
 
         var htmlReportLocation = getReports().getHtml().getOutputLocation().getAsFile().getOrNull();
         if (htmlReportLocation != null) {
-            new CheckstyleHtmlIssuesRenderer().renderIssuesToFile(issues, htmlReportLocation);
+            new CheckstyleHtmlIssuesRenderer("Lombok Config").renderIssuesToFile(issues, htmlReportLocation);
         }
 
         if (!issues.isEmpty()) {
