@@ -10,6 +10,7 @@ import static name.remal.gradle_plugins.toolkit.ClosureUtils.configureWith;
 import static name.remal.gradle_plugins.toolkit.LayoutUtils.getRootDirOf;
 import static name.remal.gradle_plugins.toolkit.PredicateUtils.not;
 import static name.remal.gradle_plugins.toolkit.ReportContainerUtils.createReportContainerFor;
+import static name.remal.gradle_plugins.toolkit.VerificationExceptionUtils.newVerificationException;
 import static name.remal.gradle_plugins.toolkit.issues.Issue.newIssueBuilder;
 import static name.remal.gradle_plugins.toolkit.issues.TextMessage.textMessageOf;
 import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
@@ -145,7 +146,7 @@ public abstract class ValidateLombokConfig
             getLogger().error(new TextIssuesRenderer().renderIssues(issues));
 
             if (!getIgnoreFailures()) {
-                throw new AssertionError(format(
+                throw newVerificationException(format(
                     "Lombok config validation analysis failed with %d issues",
                     issues.size()
                 ));
