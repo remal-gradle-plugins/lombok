@@ -111,34 +111,12 @@ apply from: 'build-generate-LombokConfigurationKeys.gradle'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-createLombokArtifactsConfiguration('librariesToTestCompatibility', false)
-
 dependencies {
-    librariesToTestCompatibility 'org.mapstruct:mapstruct:1.6.3'
-    librariesToTestCompatibility 'org.mapstruct:mapstruct-processor:1.6.3'
-    librariesToTestCompatibility 'io.micronaut:micronaut-inject-java:4.7.12'
-    librariesToTestCompatibility 'io.micronaut.validation:micronaut-validation:4.8.0'
-    librariesToTestCompatibility 'io.micronaut.validation:micronaut-validation-processor:4.8.0'
-}
-
-apply from: 'build-generate-LibrariesToTestCompatibility.gradle'
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-generateSources.forMainSourceSet.java {
-    String repositoryHtmlUrl = project.ext['repository-html-url']
-    inputs.property('repository-html-url', repositoryHtmlUrl)
-
-    classFile("${project.calculateBaseJavaPackage()}.config.rule", 'DocUtils') {
-        addStaticImport("lombok.AccessLevel", "PRIVATE")
-
-        addImport("lombok.NoArgsConstructor")
-
-        line("@NoArgsConstructor(access = PRIVATE)")
-        block("abstract class ${it.simpleName}") {
-            line("public static final String PLUGIN_REPOSITORY_HTML_URL = \"${escapeString(repositoryHtmlUrl)}\";")
-        }
-    }
+    functionalTestAdditionalClasspath('org.mapstruct:mapstruct:1.6.3') { transitive = false }
+    functionalTestAdditionalClasspath('org.mapstruct:mapstruct-processor:1.6.3') { transitive = false }
+    functionalTestAdditionalClasspath('io.micronaut:micronaut-inject-java:4.7.12') { transitive = false }
+    functionalTestAdditionalClasspath('io.micronaut.validation:micronaut-validation:4.8.0') { transitive = false }
+    functionalTestAdditionalClasspath('io.micronaut.validation:micronaut-validation-processor:4.8.0') { transitive = false }
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

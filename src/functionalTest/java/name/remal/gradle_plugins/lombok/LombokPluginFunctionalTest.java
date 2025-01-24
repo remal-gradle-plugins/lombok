@@ -1,12 +1,11 @@
 package name.remal.gradle_plugins.lombok;
 
-import static java.lang.String.format;
 import static java.lang.String.join;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isRegularFile;
 import static java.nio.file.Files.readString;
-import static name.remal.gradle_plugins.lombok.LibrariesToTestCompatibility.getLibraryNotation;
 import static name.remal.gradle_plugins.toolkit.PathUtils.deleteRecursively;
+import static name.remal.gradle_plugins.toolkit.testkit.TestClasspath.getTestClasspathLibraryFullNotation;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.file.Path;
@@ -29,7 +28,7 @@ class LombokPluginFunctionalTest {
         project.forBuildFile(build -> {
             build.applyPlugin("name.remal.lombok");
             build.applyPlugin("java");
-            build.addMavenCentralRepository();
+            build.line("repositories { mavenCentral() }");
             build.line("tasks.withType(JavaCompile) { options.compilerArgs.add('-parameters') }");
             build.line(join("\n", new String[]{
                 "tasks.named('compileJava') {",
@@ -123,12 +122,14 @@ class LombokPluginFunctionalTest {
         @Test
         void mapstruct() throws Throwable {
             project.forBuildFile(build -> {
-                build.line(format("dependencies { compileOnly '%s' }", build.escapeString(getLibraryNotation(
-                    "org.mapstruct:mapstruct"
-                ))));
-                build.line(format("dependencies { annotationProcessor '%s' }", build.escapeString(getLibraryNotation(
-                    "org.mapstruct:mapstruct-processor"
-                ))));
+                build.line(
+                    "dependencies { compileOnly '%s' }",
+                    build.escapeString(getTestClasspathLibraryFullNotation("org.mapstruct:mapstruct"))
+                );
+                build.line(
+                    "dependencies { annotationProcessor '%s' }",
+                    build.escapeString(getTestClasspathLibraryFullNotation("org.mapstruct:mapstruct-processor"))
+                );
             });
 
             project.writeTextFile("src/main/java/pkg/TestClassWithBuilder.java", join(
@@ -169,15 +170,21 @@ class LombokPluginFunctionalTest {
             project.getBuildFile().block("dependencies", deps -> {
                 deps.line(
                     "compileOnly '%s'",
-                    deps.escapeString(getLibraryNotation("io.micronaut.validation:micronaut-validation"))
+                    deps.escapeString(getTestClasspathLibraryFullNotation(
+                        "io.micronaut.validation:micronaut-validation"
+                    ))
                 );
                 deps.line(
                     "annotationProcessor '%s'",
-                    deps.escapeString(getLibraryNotation("io.micronaut.validation:micronaut-validation-processor"))
+                    deps.escapeString(getTestClasspathLibraryFullNotation(
+                        "io.micronaut.validation:micronaut-validation-processor"
+                    ))
                 );
                 deps.line(
                     "annotationProcessor '%s'",
-                    deps.escapeString(getLibraryNotation("io.micronaut:micronaut-inject-java"))
+                    deps.escapeString(getTestClasspathLibraryFullNotation(
+                        "io.micronaut:micronaut-inject-java"
+                    ))
                 );
             });
 

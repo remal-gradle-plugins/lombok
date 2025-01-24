@@ -1,7 +1,7 @@
 package name.remal.gradle_plugins.lombok.config.rule;
 
 import static java.lang.String.format;
-import static name.remal.gradle_plugins.lombok.config.rule.DocUtils.PLUGIN_REPOSITORY_HTML_URL;
+import static name.remal.gradle_plugins.build_time_constants.api.BuildTimeConstants.getStringProperty;
 
 import com.google.auto.service.AutoService;
 import name.remal.gradle_plugins.lombok.config.LombokConfig;
@@ -16,7 +16,7 @@ public class ConfigureUtilityClassUsage implements LombokConfigRule {
             context.report(getName(), config.getPath(), format(
                 "Specify one of these values for `lombok.utilityClass.flagUsage`: `error`, `warning`, `allow`."
                     + " See %s/blob/main/config-rules/ConfigureUtilityClassUsage.md",
-                PLUGIN_REPOSITORY_HTML_URL
+                getStringProperty("repository.html-url")
             ));
         }
     }
