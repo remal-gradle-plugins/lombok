@@ -2,13 +2,13 @@ package name.remal.gradle_plugins.lombok.config;
 
 import static groovy.lang.Closure.DELEGATE_FIRST;
 import static java.lang.String.format;
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.StreamSupport.stream;
 import static name.remal.gradle_plugins.lombok.config.LombokConfigUtils.parseLombokConfigs;
 import static name.remal.gradle_plugins.toolkit.ClosureUtils.configureWith;
 import static name.remal.gradle_plugins.toolkit.LayoutUtils.getRootDirOf;
-import static name.remal.gradle_plugins.toolkit.PredicateUtils.not;
 import static name.remal.gradle_plugins.toolkit.ReportContainerUtils.createReportContainerFor;
 import static name.remal.gradle_plugins.toolkit.VerificationExceptionUtils.newVerificationException;
 import static name.remal.gradle_plugins.toolkit.issues.Issue.newIssueBuilder;
