@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
-import name.remal.gradle_plugins.toolkit.testkit.MinSupportedJavaVersion;
+import name.remal.gradle_plugins.toolkit.testkit.MinTestableJavaVersion;
 import name.remal.gradle_plugins.toolkit.testkit.functional.GradleProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -165,7 +165,7 @@ class LombokPluginFunctionalTest {
         }
 
         @Test
-        @MinSupportedJavaVersion(17)
+        @MinTestableJavaVersion(17)
         void micronaut() {
             project.getBuildFile().block("dependencies", deps -> {
                 deps.line(
