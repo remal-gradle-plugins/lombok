@@ -17,6 +17,7 @@ import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.ProjectLayout;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Nested;
@@ -25,6 +26,7 @@ import org.gradle.jvm.toolchain.JavaLauncher;
 import org.gradle.process.ExecOperations;
 import org.gradle.process.JavaExecSpec;
 
+@CacheableTask
 public abstract class AbstractLombokTask extends DefaultTask {
 
     private static final String MAIN_CLASS = "lombok.launch.Main";
