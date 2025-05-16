@@ -8,10 +8,10 @@
 
 Usage:
 
-<!--plugin-usage:name.remal.finalize-by-jacoco-->
+<!--plugin-usage:name.remal.lombok-->
 ```groovy
 plugins {
-    id 'name.remal.finalize-by-jacoco' version '2.0.1'
+    id 'name.remal.lombok' version '3.0.1'
 }
 ```
 <!--/plugin-usage-->
