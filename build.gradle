@@ -114,7 +114,7 @@ apply from: 'build-generate-LombokConfigurationKeys.gradle'
 dependencies {
     functionalTestAdditionalClasspath('org.mapstruct:mapstruct:1.6.3') { transitive = false }
     functionalTestAdditionalClasspath('org.mapstruct:mapstruct-processor:1.6.3') { transitive = false }
-    functionalTestAdditionalClasspath('io.micronaut:micronaut-inject-java:4.8.16') { transitive = false }
+    functionalTestAdditionalClasspath('io.micronaut:micronaut-inject-java:4.8.17') { transitive = false }
     functionalTestAdditionalClasspath('io.micronaut.validation:micronaut-validation:4.9.0') { transitive = false }
     functionalTestAdditionalClasspath('io.micronaut.validation:micronaut-validation-processor:4.9.0') { transitive = false }
 }
