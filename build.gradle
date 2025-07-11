@@ -29,7 +29,7 @@ apply plugin: 'java-gradle-plugin'
 apply plugin: 'name.remal.generate-sources'
 
 dependencies {
-    testImplementation 'com.google.jimfs:jimfs:1.3.0'
+    testImplementation 'com.google.jimfs:jimfs:1.3.1'
 }
 
 gradlePlugin {
