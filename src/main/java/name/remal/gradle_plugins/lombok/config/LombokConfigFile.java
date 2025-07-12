@@ -3,6 +3,7 @@ package name.remal.gradle_plugins.lombok.config;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
 import java.util.List;
+import java.util.stream.Stream;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -30,6 +31,12 @@ public class LombokConfigFile implements WithFile, WithProperties {
 
     @Singular("parseError")
     List<LombokConfigFileParseError> parseErrors;
+
+
+    @Override
+    public Stream<LombokConfigFileProperty> streamProperties() {
+        return getProperties().stream();
+    }
 
 
     @Getter(lazy = true)

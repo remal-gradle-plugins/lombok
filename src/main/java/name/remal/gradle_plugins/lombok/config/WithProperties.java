@@ -1,6 +1,7 @@
 package name.remal.gradle_plugins.lombok.config;
 
 import static java.lang.Boolean.parseBoolean;
+import static java.util.stream.Collectors.toUnmodifiableList;
 import static name.remal.gradle_plugins.lombok.config.LombokConfigFileProperty.byLombokConfigKey;
 import static name.remal.gradle_plugins.lombok.config.LombokConfigPropertyOperator.CLEAR;
 import static name.remal.gradle_plugins.lombok.config.LombokConfigPropertyOperator.MINUS;
@@ -12,18 +13,23 @@ import com.google.common.collect.ImmutableList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 interface WithProperties {
 
+    Stream<LombokConfigFileProperty> streamProperties();
+
     @Unmodifiable
-    List<LombokConfigFileProperty> getProperties();
+    default List<LombokConfigFileProperty> getProperties() {
+        return streamProperties().collect(toUnmodifiableList());
+    }
 
 
     @Nullable
     default String get(String key) {
-        var property = getProperties().stream()
+        var property = streamProperties()
             .filter(byLombokConfigKey(key))
             .reduce((first, second) -> second)
             .orElse(null);
@@ -68,7 +74,7 @@ interface WithProperties {
     @Unmodifiable
     default List<String> getList(String key) {
         Set<String> result = new LinkedHashSet<>();
-        getProperties().stream()
+        streamProperties()
             .filter(byLombokConfigKey(key))
             .forEach(property -> {
                 var operator = property.getOperator();

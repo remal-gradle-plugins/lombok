@@ -13,9 +13,9 @@ import static name.remal.gradle_plugins.toolkit.PathUtils.normalizePath;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.ToString;
 import org.jetbrains.annotations.Unmodifiable;
@@ -65,12 +65,9 @@ public class LombokConfig implements WithProperties {
 
 
     @Override
-    @Unmodifiable
-    public List<LombokConfigFileProperty> getProperties() {
+    public Stream<LombokConfigFileProperty> streamProperties() {
         return getConfigFiles().stream()
-            .map(LombokConfigFile::getProperties)
-            .flatMap(Collection::stream)
-            .collect(toUnmodifiableList());
+            .flatMap(LombokConfigFile::streamProperties);
     }
 
 
