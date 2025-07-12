@@ -17,7 +17,7 @@ abstract class ImportInstructionResolver {
 
     @SuppressWarnings("java:S3776")
     public static ResolvedImport resolveImport(ImportInstruction instruction) {
-        String value = instruction.getValue()
+        var value = instruction.getValue()
             .replace('\\', '/');
 
         if (value.isEmpty()) {
@@ -39,7 +39,7 @@ abstract class ImportInstructionResolver {
                 .build();
         }
 
-        String file = valueParts.get(0);
+        var file = valueParts.get(0);
         if (file.startsWith("~")) {
             file = getHomeDirPath() + file.substring(1);
         }
@@ -52,7 +52,7 @@ abstract class ImportInstructionResolver {
         var instructionFile = instruction.getFile();
         var fileSystemPath = instructionFile.getFileSystemPath();
 
-        Path filePath = fileSystemPath.getFileSystem().getPath(file);
+        var filePath = fileSystemPath.getFileSystem().getPath(file);
         if (file.startsWith("/")) {
             filePath = normalizePath(filePath);
         }

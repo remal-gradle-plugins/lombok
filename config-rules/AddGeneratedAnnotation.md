@@ -1,6 +1,7 @@
 # `AddGeneratedAnnotation`
 
-Lombok can be configured to add `@lombok.Generated` annotations to all generated nodes where possible. It's very useful for tools like JaCoCo, or other checkers and code coverage tools.
+Lombok can be configured to add `@lombok.Generated` annotations to all generated nodes where possible.
+It's very useful for tools like JaCoCo, or other checkers and code coverage tools.
 
 To enable this functionality, set one of these properties to `true`:
 

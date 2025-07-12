@@ -1,13 +1,11 @@
 package name.remal.gradle_plugins.lombok.config;
 
-import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isRegularFile;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.reverse;
-import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toUnmodifiableList;
 import static name.remal.gradle_plugins.lombok.config.LombokConfigFileParser.parseLombokConfigFile;
 import static name.remal.gradle_plugins.toolkit.ObjectUtils.doNotInline;
 import static name.remal.gradle_plugins.toolkit.PathUtils.normalizePath;
@@ -59,24 +57,20 @@ public class LombokConfig implements WithProperties {
 
     @Unmodifiable
     public List<Path> getInvolvedPaths() {
-        return unmodifiableList(
-            getConfigFiles().stream()
-                .map(LombokConfigFile::getFile)
-                .map(LombokConfigPath::getFileSystemPath)
-                .collect(toList())
-        );
+        return getConfigFiles().stream()
+            .map(LombokConfigFile::getFile)
+            .map(LombokConfigPath::getFileSystemPath)
+            .collect(toUnmodifiableList());
     }
 
 
     @Override
     @Unmodifiable
     public List<LombokConfigFileProperty> getProperties() {
-        return unmodifiableList(
-            getConfigFiles().stream()
-                .map(LombokConfigFile::getProperties)
-                .flatMap(Collection::stream)
-                .collect(toList())
-        );
+        return getConfigFiles().stream()
+            .map(LombokConfigFile::getProperties)
+            .flatMap(Collection::stream)
+            .collect(toUnmodifiableList());
     }
 
 
@@ -84,11 +78,11 @@ public class LombokConfig implements WithProperties {
     private final List<LombokConfigFile> configFiles = resolveConfigFiles();
 
     private List<LombokConfigFile> resolveConfigFiles() {
-        List<LombokConfigFile> result = new ArrayList<>();
+        var result = new ArrayList<LombokConfigFile>();
         var isStopped = new AtomicBoolean(false);
-        for (Path currentDir = dir; currentDir != null; currentDir = currentDir.getParent()) {
+        for (var currentDir = dir; currentDir != null; currentDir = currentDir.getParent()) {
             var file = currentDir.resolve(LOMBOK_CONFIG_FILE_NAME);
-            if (exists(file)) {
+            if (isRegularFile(file)) {
                 processFile(isStopped, result, new LombokConfigPathSystem(file), emptyList());
                 if (isStopped.get()) {
                     break;
@@ -96,16 +90,16 @@ public class LombokConfig implements WithProperties {
             }
         }
         reverse(result);
-        return unmodifiableList(result);
+        return List.copyOf(result);
     }
 
     private static void processFile(
         AtomicBoolean isStopped,
         List<LombokConfigFile> result,
         LombokConfigPath file,
-        List<ImportTraceElement> importTrace
+        @Unmodifiable List<ImportTraceElement> importTrace
     ) {
-        LombokConfigFile configFile = parseLombokConfigFile(file);
+        var configFile = parseLombokConfigFile(file);
 
         if (!importTrace.isEmpty()) {
             configFile = configFile.withImportTrace(importTrace);
@@ -118,16 +112,16 @@ public class LombokConfig implements WithProperties {
         }
 
 
-        List<ResolvedImportFile> resolvedImports = configFile.getResolvedImports().stream()
+        var resolvedImports = configFile.getResolvedImports().stream()
             .filter(ResolvedImportFile.class::isInstance)
             .map(ResolvedImportFile.class::cast)
             .collect(toCollection(ArrayList::new));
         reverse(resolvedImports);
         for (var resolvedImport : resolvedImports) {
-            var currentImportTrace = new ArrayList<>(importTrace);
-            currentImportTrace.add(ImportTraceElement.builderFor(resolvedImport).build());
+            var newImportTrace = new ArrayList<>(importTrace);
+            newImportTrace.add(ImportTraceElement.builderFor(resolvedImport).build());
 
-            processFile(isStopped, result, resolvedImport.getFileToImport(), unmodifiableList(currentImportTrace));
+            processFile(isStopped, result, resolvedImport.getFileToImport(), List.copyOf(newImportTrace));
         }
     }
 

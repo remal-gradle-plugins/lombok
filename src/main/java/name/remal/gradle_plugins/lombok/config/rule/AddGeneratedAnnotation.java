@@ -1,7 +1,6 @@
 package name.remal.gradle_plugins.lombok.config.rule;
 
 import static java.lang.String.format;
-import static name.remal.gradle_plugins.build_time_constants.api.BuildTimeConstants.getStringProperty;
 
 import com.google.auto.service.AutoService;
 import com.google.common.annotations.VisibleForTesting;
@@ -10,7 +9,7 @@ import java.util.Objects;
 import name.remal.gradle_plugins.lombok.config.LombokConfig;
 
 @AutoService(LombokConfigRule.class)
-public class AddGeneratedAnnotation implements LombokConfigRule {
+public class AddGeneratedAnnotation extends AbstractRule {
 
     @VisibleForTesting
     static final List<String> ADD_GENERATED_ANNOTATION_CONFIG_KEYS = List.of(
@@ -31,8 +30,8 @@ public class AddGeneratedAnnotation implements LombokConfigRule {
 
         context.report(getName(), config.getPath(), format(
             "Configure `lombok.addLombokGeneratedAnnotation` or `lombok.addJavaxGeneratedAnnotation`."
-                + " See %s/blob/main/config-rules/AddGeneratedAnnotation.md",
-            getStringProperty("repository.html-url")
+                + " See %s",
+            getDocumentationUrl()
         ));
     }
 

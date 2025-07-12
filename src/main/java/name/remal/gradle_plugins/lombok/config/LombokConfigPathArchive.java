@@ -1,6 +1,5 @@
 package name.remal.gradle_plugins.lombok.config;
 
-import static com.google.common.io.ByteStreams.toByteArray;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.newInputStream;
 
@@ -8,9 +7,7 @@ import java.io.InputStream;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.zip.ZipInputStream;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.meta.When;
 import lombok.SneakyThrows;
 import lombok.Value;
 
@@ -38,11 +35,14 @@ public class LombokConfigPathArchive implements LombokConfigPath {
     @Override
     @SneakyThrows
     public String readContent() {
-        var content = forEntry(stream ->
-            stream != null
-                ? new String(toByteArray(stream), UTF_8)
-                : null
-        );
+        var content = forEntry(stream -> {
+            if (stream == null) {
+                return null;
+            }
+
+            var bytes = stream.readAllBytes();
+            return new String(bytes, UTF_8);
+        });
 
         if (content == null) {
             throw new NoSuchFileException(toString());
@@ -51,14 +51,8 @@ public class LombokConfigPathArchive implements LombokConfigPath {
         return content;
     }
 
-    @FunctionalInterface
-    private interface EntryProcessor<T> {
-        @Nonnull(when = When.UNKNOWN)
-        T process(@Nullable InputStream inputStream) throws Throwable;
-    }
-
+    @Nullable
     @SneakyThrows
-    @Nonnull(when = When.UNKNOWN)
     @SuppressWarnings("java:S5042")
     private <T> T forEntry(EntryProcessor<T> action) {
         var entryNameToFind = getEntryName();
@@ -66,7 +60,7 @@ public class LombokConfigPathArchive implements LombokConfigPath {
             try (var zipStream = new ZipInputStream(stream, UTF_8)) {
                 while (true) {
                     var entry = zipStream.getNextEntry();
-                    if (entry == null) {
+                    if (entry == null || entry.isDirectory()) {
                         return action.process(null);
                     }
 
@@ -76,6 +70,12 @@ public class LombokConfigPathArchive implements LombokConfigPath {
                 }
             }
         }
+    }
+
+    @FunctionalInterface
+    private interface EntryProcessor<T> {
+        @Nullable
+        T process(@Nullable InputStream inputStream) throws Throwable;
     }
 
     @Override

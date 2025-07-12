@@ -111,6 +111,10 @@ apply from: 'build-generate-LombokConfigurationKeys.gradle'
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+tasks.withType(Test).configureEach {
+    environment('LOMBOK_PLUGIN_ROOT_DIR', project.rootDir.absolutePath)
+}
+
 dependencies {
     functionalTestAdditionalClasspath('org.mapstruct:mapstruct:1.6.3') { transitive = false }
     functionalTestAdditionalClasspath('org.mapstruct:mapstruct-processor:1.6.3') { transitive = false }

@@ -1,14 +1,13 @@
 package name.remal.gradle_plugins.lombok.config.rule;
 
 import static java.lang.String.format;
-import static name.remal.gradle_plugins.build_time_constants.api.BuildTimeConstants.getStringProperty;
 import static name.remal.gradle_plugins.lombok.config.LombokConfig.LOMBOK_CONFIG_FILE_NAME;
 
 import com.google.auto.service.AutoService;
 import name.remal.gradle_plugins.lombok.config.LombokConfig;
 
 @AutoService(LombokConfigRule.class)
-public class StopBubblingAtRoot implements LombokConfigRule {
+public class StopBubblingAtRoot extends AbstractRule {
 
     @Override
     public void validate(LombokConfig config, LombokConfigValidationContext context) {
@@ -24,9 +23,9 @@ public class StopBubblingAtRoot implements LombokConfigRule {
             context.report(getName(), rootPath, format(
                 "Root project or repository root doesn't contain %s file."
                     + " Create such a file with `config.stopBubbling = true` line to make the build system independent."
-                    + " See %s/blob/main/config-rules/StopBubblingAtRoot.md",
+                    + " See %s",
                 LOMBOK_CONFIG_FILE_NAME,
-                getStringProperty("repository.html-url")
+                getDocumentationUrl()
             ));
         }
 

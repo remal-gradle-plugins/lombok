@@ -133,7 +133,7 @@ public abstract class GenerateLombokConfig extends DefaultTask {
 
 
     private static <T> int lastIndexOf(List<T> list, Predicate<T> condition) {
-        for (int i = list.size() - 1; 0 <= i; --i) {
+        for (var i = list.size() - 1; 0 <= i; --i) {
             var item = list.get(i);
             if (condition.test(item)) {
                 return i;
