@@ -96,6 +96,8 @@ class LombokPluginFunctionalTest {
             + "'AddGeneratedAnnotation',"
             + "'ConfigureAccessorsUsage',"
             + "'ConfigureUtilityClassUsage',"
+            + "'ConfigureValUsage',"
+            + "'ConfigureVarUsage',"
             + ")");
         project.assertBuildSuccessfully("validateLombokConfig");
     }
