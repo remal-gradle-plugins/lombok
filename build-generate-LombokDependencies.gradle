@@ -2,28 +2,6 @@ generateSources.forMainSourceSet.java {
     inputs.files(configurations.lombokCoreArtifacts).withPropertyName('lombokCoreArtifacts')
     inputs.files(configurations.lombokAddonsArtifacts).withPropertyName('lombokAddonsArtifacts').optional()
 
-    classFile(project.calculateBaseJavaPackage(), 'LombokDependencyType') {
-        block("enum ${simpleName}") {
-            line("CORE,")
-            line("ADDON,")
-            line(";")
-        }
-    }
-
-    classFile(project.calculateBaseJavaPackage(), 'LombokDependency') {
-        addImport("lombok.Builder")
-        addImport("lombok.Value")
-
-        line("@Value")
-        line("@Builder")
-        block("class ${simpleName}") {
-            line("LombokDependencyType type;")
-            line("String group;")
-            line("String name;")
-            line("String version;")
-        }
-    }
-
     classFile(project.calculateBaseJavaPackage(), 'LombokDependencies') {
         addStaticImport("lombok.AccessLevel", "PRIVATE")
 
