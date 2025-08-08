@@ -2,6 +2,8 @@ package name.remal.gradle_plugins.lombok;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.String.format;
+import static java.util.Comparator.comparing;
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static name.remal.gradle_plugins.lombok.AnnotationProcessorsLombokOrderUtils.withFixedAnnotationProcessorFilesOrder;
@@ -50,16 +52,21 @@ import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.DependencyConstraint;
+import org.gradle.api.artifacts.DependencyConstraintSet;
 import org.gradle.api.artifacts.ExternalModuleDependency;
+import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.attributes.AttributeContainer;
 import org.gradle.api.attributes.Category;
 import org.gradle.api.attributes.Usage;
 import org.gradle.api.file.ProjectLayout;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
+import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.api.tasks.javadoc.Javadoc;
 import org.gradle.jvm.toolchain.JavaCompiler;
@@ -73,17 +80,11 @@ public abstract class LombokPlugin implements Plugin<Project> {
     public static final String VALIDATE_LOMBOK_CONFIG_TASK_NAME = doNotInline("validateLombokConfig");
     public static final String GENERATE_LOMBOK_CONFIG_TASK_NAME = doNotInline("generateLombokConfig");
 
-    private Project project;
-    private LombokExtension lombokExtension;
-    private Configuration lombokConf;
-
     @Override
     public void apply(Project project) {
-        this.project = project;
+        var lombokExtension = project.getExtensions().create(LOMBOK_EXTENSION_NAME, LombokExtension.class);
 
-        this.lombokExtension = project.getExtensions().create(LOMBOK_EXTENSION_NAME, LombokExtension.class);
-
-        this.lombokConf = project.getConfigurations().create(LOMBOK_CONFIGURATION_NAME, conf -> {
+        var lombokConf = getConfigurations().create(LOMBOK_CONFIGURATION_NAME, conf -> {
             conf.setDescription("Lombok");
             conf.defaultDependencies(deps -> {
                 deps.add(createDependency(
@@ -96,71 +97,66 @@ public abstract class LombokPlugin implements Plugin<Project> {
             conf.attributes(javaRuntimeLibrary());
         });
 
-        lombokExtension.getLombokVersion().convention(getProviders().provider(this::getDefaultLombokVersion));
+        lombokExtension.getLombokVersion().convention(getProviders().provider(() ->
+            getDefaultLombokVersion(project, lombokConf)
+        ));
 
 
-        configureLombokTasks();
-        configureJavacReflectionsAccess();
-        configureAnnotationProcessorsOrder();
+        configureLombokTasks(lombokExtension, lombokConf);
+        configureJavacReflectionsAccess(lombokExtension);
+        configureAnnotationProcessorsOrder(lombokExtension);
         configureCompileInputFiles();
-        configureConfigValidation();
-        configureConfigGeneration();
+        configureConfigValidation(project, lombokExtension);
+        configureConfigGeneration(project, lombokExtension);
 
         project.getPluginManager().withPlugin("java", __ -> {
-            configureSourceSetConfigurations();
-            configureDelombokForAllSourceSets();
+            configureSourceSetConfigurations(project, lombokConf);
+            configureDelombokForAllSourceSets(project);
         });
     }
 
 
-    private String getDefaultLombokVersion() {
+    @SuppressWarnings({"java:S2637", "java:S2259"}) // false positives
+    private String getDefaultLombokVersion(Project project, Configuration lombokConf) {
         var lombokDependency = getLombokDependency("lombok");
         return Stream.of(
                 lombokConf,
                 project.getPluginManager().hasPlugin("java")
-                    ? project.getConfigurations().findByName(ANNOTATION_PROCESSOR_CONFIGURATION_NAME)
+                    ? getConfigurations().findByName(ANNOTATION_PROCESSOR_CONFIGURATION_NAME)
                     : null,
                 project.getPluginManager().hasPlugin("java")
-                    ? project.getConfigurations().findByName(COMPILE_CLASSPATH_CONFIGURATION_NAME)
+                    ? getConfigurations().findByName(COMPILE_CLASSPATH_CONFIGURATION_NAME)
                     : null
             )
             .filter(Objects::nonNull)
             .map(Configuration::getAllDependencyConstraints)
-            .map(constraints -> constraints.stream()
-                .filter(constraint -> lombokDependency.getGroup().equals(constraint.getGroup()))
-                .filter(constraint -> lombokDependency.getName().equals(constraint.getName()))
-                .map(DependencyConstraint::getVersion)
-                .filter(ObjectUtils::isNotEmpty)
-                .reduce((first, second) -> Version.parse(first).compareTo(Version.parse(second)) >= 0 ? first : second)
-                .orElse(null)
-            )
+            .flatMap(DependencyConstraintSet::stream)
+            .filter(constraint -> lombokDependency.getGroup().equals(constraint.getGroup()))
+            .filter(constraint -> lombokDependency.getName().equals(constraint.getName()))
+            .map(DependencyConstraint::getVersion)
             .filter(Objects::nonNull)
-            .findFirst()
+            .filter(not(String::isEmpty))
+            .max(comparing(Version::parse))
             .orElseGet(lombokDependency::getVersion);
     }
 
 
-    private void configureLombokTasks() {
-        project.getTasks().withType(AbstractLombokTask.class, task -> {
+    private void configureLombokTasks(LombokExtension lombokExtension, Configuration lombokConf) {
+        getTasks().withType(AbstractLombokTask.class, task -> {
             task.getToolClasspath().setFrom(lombokConf);
         });
 
-        project.getTasks().withType(Delombok.class, task -> {
+        getTasks().withType(Delombok.class, task -> {
             task.getFormat().convention(lombokExtension.getDelombok().getFormat());
         });
     }
 
 
     @SuppressWarnings("java:S3776")
-    private void configureJavacReflectionsAccess() {
+    private void configureJavacReflectionsAccess(LombokExtension lombokExtension) {
         var isEnabled = lombokExtension.getFixJavacReflectionsAccess();
-        project.getTasks().withType(JavaCompile.class).configureEach(task -> {
+        getTasks().withType(JavaCompile.class).configureEach(task -> {
             doBeforeTaskExecution(task, __ -> {
-                var compileOptions = task.getOptions();
-                if (compileOptions == null) {
-                    return;
-                }
-
                 if (!defaultTrue(isEnabled.getOrNull())) {
                     return;
                 }
@@ -188,6 +184,7 @@ public abstract class LombokPlugin implements Plugin<Project> {
                     return;
                 }
 
+                var compileOptions = task.getOptions();
                 List<String> compilerArgs = compileOptions.getCompilerArgs();
                 compilerArgs = withJavacPackageOpens(compilerArgs);
                 compileOptions.setCompilerArgs(compilerArgs);
@@ -196,22 +193,18 @@ public abstract class LombokPlugin implements Plugin<Project> {
     }
 
 
-    @SuppressWarnings({"UnstableApiUsage", "java:S3776"})
-    private void configureAnnotationProcessorsOrder() {
+    @SuppressWarnings("java:S3776")
+    private void configureAnnotationProcessorsOrder(LombokExtension lombokExtension) {
         var isEnabled = lombokExtension.getFixAnnotationProcessorsOrder();
         var layout = getLayout();
         var providers = getProviders();
-        project.getTasks().withType(JavaCompile.class).configureEach(task -> {
+        getTasks().withType(JavaCompile.class).configureEach(task -> {
             doBeforeTaskExecution(task, __ -> {
-                var compileOptions = task.getOptions();
-                if (compileOptions == null) {
-                    return;
-                }
-
                 if (!defaultTrue(isEnabled.getOrNull())) {
                     return;
                 }
 
+                var compileOptions = task.getOptions();
                 var annotationProcessorPath = compileOptions.getAnnotationProcessorPath();
                 if (annotationProcessorPath == null) {
                     return;
@@ -225,15 +218,11 @@ public abstract class LombokPlugin implements Plugin<Project> {
             });
 
             doBeforeTaskExecution(task, __ -> {
-                var compileOptions = task.getOptions();
-                if (compileOptions == null) {
-                    return;
-                }
-
                 if (!defaultTrue(isEnabled.getOrNull())) {
                     return;
                 }
 
+                var compileOptions = task.getOptions();
                 List<String> compilerArgs = compileOptions.getCompilerArgs();
                 if (isEmpty(compilerArgs)) {
                     return;
@@ -265,7 +254,7 @@ public abstract class LombokPlugin implements Plugin<Project> {
 
 
     private void configureCompileInputFiles() {
-        project.getTasks().withType(JavaCompile.class).configureEach(task -> {
+        getTasks().withType(JavaCompile.class).configureEach(task -> {
             task.getInputs().files(getProviders().provider(() ->
                 parseLombokConfigs(task).stream()
                     .map(LombokConfig::getInvolvedPaths)
@@ -276,8 +265,8 @@ public abstract class LombokPlugin implements Plugin<Project> {
     }
 
 
-    private void configureConfigValidation() {
-        var tasks = project.getTasks();
+    private void configureConfigValidation(Project project, LombokExtension lombokExtension) {
+        var tasks = getTasks();
         var extensionDisabledRules = lombokExtension.getConfig().getValidate().getDisabledRules();
         tasks.register(VALIDATE_LOMBOK_CONFIG_TASK_NAME, ValidateLombokConfig.class, task -> {
             var javaCompileTasks = tasks.withType(JavaCompile.class);
@@ -302,7 +291,7 @@ public abstract class LombokPlugin implements Plugin<Project> {
 
 
     @SuppressWarnings({"Slf4jFormatShouldBeConst", "StringConcatenationArgumentToLogCall"})
-    private void configureConfigGeneration() {
+    private void configureConfigGeneration(Project project, LombokExtension lombokExtension) {
         afterEvaluateOrNow(project, __ -> {
             var isEnabled = lombokExtension.getConfig().getGenerate().getEnabled().getOrNull();
             if (FALSE.equals(isEnabled)) {
@@ -321,25 +310,25 @@ public abstract class LombokPlugin implements Plugin<Project> {
             }
 
             var generate = lombokExtension.getConfig().getGenerate();
-            project.getTasks().register(GENERATE_LOMBOK_CONFIG_TASK_NAME, GenerateLombokConfig.class, task -> {
+            getTasks().register(GENERATE_LOMBOK_CONFIG_TASK_NAME, GenerateLombokConfig.class, task -> {
                 task.getFile().convention(generate.getFile());
                 task.getProperties().convention(generate.getProperties());
             });
 
-            project.getTasks().withType(JavaCompile.class).configureEach(task -> {
+            getTasks().withType(JavaCompile.class).configureEach(task -> {
                 task.dependsOn(project.getTasks().withType(GenerateLombokConfig.class));
             });
         });
     }
 
 
-    private void configureSourceSetConfigurations() {
+    private void configureSourceSetConfigurations(Project project, Configuration lombokConf) {
         getExtension(project, SourceSetContainer.class).all(sourceSet -> {
-            configureConfiguration(project, sourceSet.getCompileOnlyConfigurationName(), conf -> {
+            configureConfiguration(sourceSet.getCompileOnlyConfigurationName(), conf -> {
                 conf.extendsFrom(lombokConf);
             });
 
-            configureConfiguration(project, sourceSet.getAnnotationProcessorConfigurationName(), conf -> {
+            configureConfiguration(sourceSet.getAnnotationProcessorConfigurationName(), conf -> {
                 conf.extendsFrom(lombokConf);
 
                 conf.getDependencies().add(createDependency(
@@ -350,7 +339,7 @@ public abstract class LombokPlugin implements Plugin<Project> {
     }
 
 
-    private void configureDelombokForAllSourceSets() {
+    private void configureDelombokForAllSourceSets(Project project) {
         getExtension(project, SourceSetContainer.class).all(sourceSet -> {
             var delombokTaskName = getDelombokTaskNameFor(sourceSet);
             var delombokProvider = project.getTasks().register(delombokTaskName, Delombok.class, delombok -> {
@@ -377,7 +366,7 @@ public abstract class LombokPlugin implements Plugin<Project> {
             });
 
             var javadocTaskName = sourceSet.getJavadocTaskName();
-            project.getTasks().withType(Javadoc.class)
+            getTasks().withType(Javadoc.class)
                 .matching(it -> it.getName().equals(javadocTaskName))
                 .configureEach(javadoc -> {
                     javadoc.dependsOn(delombokProvider);
@@ -393,12 +382,12 @@ public abstract class LombokPlugin implements Plugin<Project> {
         return sourceSet.getTaskName(DELOMBOK_TASK_NAME, "");
     }
 
-    private static void configureConfiguration(Project project, String name, Action<Configuration> action) {
-        project.getConfigurations().matching(it -> Objects.equals(it.getName(), name)).all(action);
+    private void configureConfiguration(String name, Action<Configuration> action) {
+        getConfigurations().matching(it -> Objects.equals(it.getName(), name)).all(action);
     }
 
     private ExternalModuleDependency createDependency(LombokDependency lombokDependency) {
-        var dep = (ExternalModuleDependency) project.getDependencies().create(format(
+        var dep = (ExternalModuleDependency) getDependencies().create(format(
             "%s:%s:%s",
             lombokDependency.getGroup(),
             lombokDependency.getName(),
@@ -414,13 +403,13 @@ public abstract class LombokPlugin implements Plugin<Project> {
     ) {
         final ExternalModuleDependency dep;
         if (isEmpty(version)) {
-            dep = (ExternalModuleDependency) project.getDependencies().create(format(
+            dep = (ExternalModuleDependency) getDependencies().create(format(
                 "%s:%s",
                 lombokDependency.getGroup(),
                 lombokDependency.getName()
             ));
         } else {
-            dep = (ExternalModuleDependency) project.getDependencies().create(format(
+            dep = (ExternalModuleDependency) getDependencies().create(format(
                 "%s:%s:%s",
                 lombokDependency.getGroup(),
                 lombokDependency.getName(),
@@ -435,11 +424,11 @@ public abstract class LombokPlugin implements Plugin<Project> {
         return attrs -> {
             attrs.attribute(
                 USAGE_ATTRIBUTE,
-                project.getObjects().named(Usage.class, JAVA_API)
+                getObjects().named(Usage.class, JAVA_API)
             );
             attrs.attribute(
                 CATEGORY_ATTRIBUTE,
-                project.getObjects().named(Category.class, LIBRARY)
+                getObjects().named(Category.class, LIBRARY)
             );
         };
     }
@@ -449,6 +438,18 @@ public abstract class LombokPlugin implements Plugin<Project> {
 
     @Inject
     protected abstract ProjectLayout getLayout();
+
+    @Inject
+    protected abstract DependencyHandler getDependencies();
+
+    @Inject
+    protected abstract ConfigurationContainer getConfigurations();
+
+    @Inject
+    protected abstract TaskContainer getTasks();
+
+    @Inject
+    protected abstract ObjectFactory getObjects();
 
     //#endregion
 
