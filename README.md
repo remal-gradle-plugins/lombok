@@ -1,6 +1,6 @@
 **Tested on Java LTS versions from <!--property:java-runtime.min-version-->11<!--/property--> to <!--property:java-runtime.max-version-->24<!--/property-->.**
 
-**Tested on Gradle versions from <!--property:gradle-api.min-version-->7.0<!--/property--> to <!--property:gradle-api.max-version-->9.1.0-rc-2<!--/property-->.**
+**Tested on Gradle versions from <!--property:gradle-api.min-version-->7.0<!--/property--> to <!--property:gradle-api.max-version-->9.1.0-rc-4<!--/property-->.**
 
 # `name.remal.lombok` plugin
 
@@ -18,7 +18,7 @@ plugins {
 
 &nbsp;
 
-This plugin adds [Lombok annotation processor](https://mvnrepository.com/artifact/org.projectlombok/lombok/1.18.40) to `compileOnly` and `annotationProcessor` configurations for every [`SourceSet`](https://docs.gradle.org/current/javadoc/org/gradle/api/tasks/SourceSet.html).
+This plugin adds [Lombok annotation processor](https://mvnrepository.com/artifact/org.projectlombok/lombok/1.18.42) to `compileOnly` and `annotationProcessor` configurations for every [`SourceSet`](https://docs.gradle.org/current/javadoc/org/gradle/api/tasks/SourceSet.html).
 
 This is done via creating `lombok` configuration and making `compileOnly` and `annotationProcessor` configurations extend it.
 
@@ -28,7 +28,7 @@ The plugin can be configured via `lombok` extension:
 
 ```groovy
 lombok {
-  lombokVersion = '1.18.40' // Lombok version
+  lombokVersion = '1.18.42' // Lombok version
 }
 ```
 
@@ -37,7 +37,7 @@ The used Lombok version can also be configured via constraints. This is useful f
 ```groovy
 dependencies {
   constraints {
-    lombok 'org.projectlombok:lombok:1.18.40'
+    lombok 'org.projectlombok:lombok:1.18.42'
   }
 }
 ```
