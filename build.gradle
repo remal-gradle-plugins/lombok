@@ -77,7 +77,7 @@ createLombokArtifactsConfiguration('lombokCoreArtifacts')
 createLombokArtifactsConfiguration('lombokAddonsArtifacts', false)
 
 dependencies {
-    lombokCoreArtifacts 'org.projectlombok:lombok:1.18.40'
+    lombokCoreArtifacts 'org.projectlombok:lombok:1.18.42'
     lombokCoreArtifacts 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 }
 
