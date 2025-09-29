@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("StringJoin")
 class LombokConfigTest extends AbstractLombokConfigTest {
 
     final Path configA = createParentDirectories(fs.getPath("/a").resolve(LOMBOK_CONFIG_FILE_NAME));

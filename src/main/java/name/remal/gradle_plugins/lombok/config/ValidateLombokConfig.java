@@ -8,9 +8,10 @@ import static java.util.stream.Collectors.toSet;
 import static java.util.stream.StreamSupport.stream;
 import static name.remal.gradle_plugins.lombok.config.LombokConfigUtils.parseLombokConfigs;
 import static name.remal.gradle_plugins.toolkit.ClosureUtils.configureWith;
-import static name.remal.gradle_plugins.toolkit.LayoutUtils.getRootDirOf;
+import static name.remal.gradle_plugins.toolkit.LayoutUtils.getRootPathOf;
 import static name.remal.gradle_plugins.toolkit.ReportContainerUtils.createReportContainerFor;
 import static name.remal.gradle_plugins.toolkit.VerificationExceptionUtils.newVerificationException;
+import static name.remal.gradle_plugins.toolkit.git.GitUtils.findGitRepositoryRootFor;
 import static name.remal.gradle_plugins.toolkit.issues.Issue.newIssueBuilder;
 import static name.remal.gradle_plugins.toolkit.issues.TextMessage.textMessageOf;
 import static org.gradle.api.tasks.PathSensitivity.RELATIVE;
@@ -160,9 +161,12 @@ public abstract class ValidateLombokConfig
 
     {
         var project = getProject();
-        getRootDir().set(project.getLayout().dir(project.provider(() ->
-            getRootDirOf(project)
-        )));
+        getRootDir().set(project.getLayout().dir(project.provider(() -> {
+            var rootProjectDir = getRootPathOf(project);
+            var gitRootDir = findGitRepositoryRootFor(rootProjectDir);
+            var rootDir = gitRootDir != null ? gitRootDir : rootProjectDir;
+            return rootDir.toFile();
+        })));
     }
 
     @Getter
