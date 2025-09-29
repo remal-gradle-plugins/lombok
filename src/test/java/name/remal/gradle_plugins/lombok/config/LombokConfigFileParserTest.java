@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("StringJoin")
 class LombokConfigFileParserTest {
 
     final LombokConfigPath file = mock(LombokConfigPath.class);
