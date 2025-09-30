@@ -11,7 +11,7 @@ Usage:
 <!--plugin-usage:name.remal.lombok-->
 ```groovy
 plugins {
-    id 'name.remal.lombok' version '3.1.1'
+    id 'name.remal.lombok' version '3.1.3'
 }
 ```
 <!--/plugin-usage-->
