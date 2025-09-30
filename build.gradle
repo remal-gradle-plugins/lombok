@@ -118,7 +118,7 @@ tasks.withType(Test).configureEach {
 dependencies {
     functionalTestAdditionalClasspath('org.mapstruct:mapstruct:1.6.3') { transitive = false }
     functionalTestAdditionalClasspath('org.mapstruct:mapstruct-processor:1.6.3') { transitive = false }
-    functionalTestAdditionalClasspath('io.micronaut:micronaut-inject-java:4.9.11') { transitive = false }
+    functionalTestAdditionalClasspath('io.micronaut:micronaut-inject-java:4.9.12') { transitive = false }
     functionalTestAdditionalClasspath('io.micronaut.validation:micronaut-validation:4.11.0') { transitive = false }
     functionalTestAdditionalClasspath('io.micronaut.validation:micronaut-validation-processor:4.11.0') { transitive = false }
 }
