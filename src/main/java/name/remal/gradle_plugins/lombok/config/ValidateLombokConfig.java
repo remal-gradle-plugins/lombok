@@ -84,6 +84,7 @@ public abstract class ValidateLombokConfig extends DefaultTask
     @Internal
     public abstract ConfigurableFileCollection getDirectories();
 
+    @SuppressWarnings("java:S2065")
     private final transient List<LombokConfig> lombokConfigs = asLazyListProxy(() -> {
         var directories = getDirectories();
         finalizeFileCollectionValue(directories);
