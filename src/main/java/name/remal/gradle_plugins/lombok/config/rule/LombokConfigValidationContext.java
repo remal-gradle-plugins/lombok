@@ -3,10 +3,10 @@ package name.remal.gradle_plugins.lombok.config.rule;
 import static java.lang.String.format;
 
 import java.nio.file.Path;
-import javax.annotation.Nullable;
 import name.remal.gradle_plugins.lombok.config.LombokConfigPath;
 import name.remal.gradle_plugins.lombok.config.LombokConfigPathArchive;
 import org.intellij.lang.annotations.Language;
+import org.jspecify.annotations.Nullable;
 
 public interface LombokConfigValidationContext {
 

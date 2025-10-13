@@ -2,15 +2,14 @@ package name.remal.gradle_plugins.lombok.config;
 
 import static groovy.lang.Closure.DELEGATE_FIRST;
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static name.remal.gradle_plugins.lombok.config.LombokConfigUtils.parseLombokConfigs;
 import static name.remal.gradle_plugins.toolkit.ClosureUtils.configureWith;
 import static name.remal.gradle_plugins.toolkit.FileCollectionUtils.finalizeFileCollectionValue;
 import static name.remal.gradle_plugins.toolkit.LayoutUtils.getRootPathOf;
-import static name.remal.gradle_plugins.toolkit.LazyProxy.asLazyListProxy;
 import static name.remal.gradle_plugins.toolkit.ReportContainerUtils.createReportContainerFor;
 import static name.remal.gradle_plugins.toolkit.VerificationExceptionUtils.newVerificationException;
 import static name.remal.gradle_plugins.toolkit.git.GitUtils.findGitRepositoryRootFor;
@@ -25,7 +24,6 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.ServiceLoader;
-import javax.annotation.Nullable;
 import lombok.Getter;
 import name.remal.gradle_plugins.lombok.config.rule.LombokConfigRule;
 import name.remal.gradle_plugins.lombok.config.rule.LombokConfigValidationContext;
@@ -48,6 +46,7 @@ import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.VerificationTask;
 import org.intellij.lang.annotations.Language;
+import org.jspecify.annotations.Nullable;
 
 @CacheableTask
 public abstract class ValidateLombokConfig extends DefaultTask
@@ -84,12 +83,24 @@ public abstract class ValidateLombokConfig extends DefaultTask
     @Internal
     public abstract ConfigurableFileCollection getDirectories();
 
+
+    @Nullable
     @SuppressWarnings("java:S2065")
-    private final transient List<LombokConfig> lombokConfigs = asLazyListProxy(() -> {
-        var directories = getDirectories();
-        finalizeFileCollectionValue(directories);
-        return parseLombokConfigs(directories.getFiles());
-    });
+    private transient volatile List<LombokConfig> lombokConfigs;
+
+    private List<LombokConfig> getLombokConfigs() {
+        if (lombokConfigs == null) {
+            synchronized (this) {
+                if (lombokConfigs == null) {
+                    var directories = getDirectories();
+                    finalizeFileCollectionValue(directories);
+                    lombokConfigs = LombokConfigUtils.parseLombokConfigs(directories.getFiles());
+                }
+            }
+        }
+        return requireNonNull(lombokConfigs);
+    }
+
 
     @InputFiles
     @PathSensitive(RELATIVE)
@@ -97,10 +108,12 @@ public abstract class ValidateLombokConfig extends DefaultTask
     protected abstract ConfigurableFileCollection getInvolvedPaths();
 
     {
-        getInvolvedPaths().from(getProject().provider(() -> lombokConfigs.stream()
-            .map(LombokConfig::getInvolvedPaths)
-            .flatMap(Collection::stream)
-            .collect(toCollection(LinkedHashSet::new))));
+        getInvolvedPaths().from(getProject().provider(() ->
+            getLombokConfigs().stream()
+                .map(LombokConfig::getInvolvedPaths)
+                .flatMap(Collection::stream)
+                .collect(toCollection(LinkedHashSet::new))
+        ));
     }
 
     @Input
@@ -119,7 +132,7 @@ public abstract class ValidateLombokConfig extends DefaultTask
 
 
         var context = new Context();
-        for (var lombokConfig : lombokConfigs) {
+        for (var lombokConfig : getLombokConfigs()) {
             for (var rule : rules) {
                 rule.validate(lombokConfig, context);
             }

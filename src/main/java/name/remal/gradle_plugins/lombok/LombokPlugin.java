@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import lombok.CustomLog;
 import name.remal.gradle_plugins.lombok.config.GenerateLombokConfig;
@@ -70,6 +69,7 @@ import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.api.tasks.javadoc.Javadoc;
 import org.gradle.jvm.toolchain.JavaCompiler;
+import org.jspecify.annotations.Nullable;
 
 @CustomLog
 public abstract class LombokPlugin implements Plugin<Project> {

@@ -7,9 +7,9 @@ import static lombok.AccessLevel.PRIVATE;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import javax.annotation.Nullable;
 import lombok.NoArgsConstructor;
 import org.gradle.api.JavaVersion;
+import org.jspecify.annotations.Nullable;
 
 @NoArgsConstructor(access = PRIVATE)
 public abstract class JavacPackagesToOpenUtils {

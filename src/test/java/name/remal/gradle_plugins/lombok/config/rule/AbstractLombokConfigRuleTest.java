@@ -17,13 +17,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
 import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.Value;
 import name.remal.gradle_plugins.lombok.config.AbstractLombokConfigTest;
 import name.remal.gradle_plugins.lombok.config.LombokConfig;
 import org.assertj.core.api.CollectionAssert;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 abstract class AbstractLombokConfigRuleTest<Rule extends AbstractRule>
