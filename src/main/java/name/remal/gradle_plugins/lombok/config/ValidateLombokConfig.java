@@ -84,7 +84,7 @@ public abstract class ValidateLombokConfig extends DefaultTask
     @Internal
     public abstract ConfigurableFileCollection getDirectories();
 
-    private transient final List<LombokConfig> lombokConfigs = asLazyListProxy(() -> {
+    private final transient List<LombokConfig> lombokConfigs = asLazyListProxy(() -> {
         var directories = getDirectories();
         finalizeFileCollectionValue(directories);
         return parseLombokConfigs(directories.getFiles());
@@ -177,8 +177,7 @@ public abstract class ValidateLombokConfig extends DefaultTask
                 .message(textMessageOf(message))
                 .rule(rule)
                 .startLine(lineNumber)
-                .build()
-            );
+                .build());
         }
 
     }
