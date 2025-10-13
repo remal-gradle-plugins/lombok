@@ -13,8 +13,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import javax.annotation.Nullable;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.Nullable;
 
 @NoArgsConstructor(access = PRIVATE)
 abstract class AnnotationProcessorsLombokOrderUtils {

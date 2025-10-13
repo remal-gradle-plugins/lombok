@@ -17,27 +17,13 @@ import org.gradle.api.internal.file.FileOperations
 
 generateSources.forMainSourceSet.java {
     Injections injections = project.objects.newInstance(Injections)
-
     inputs.files(configurations.lombokSources).withPropertyName('lombokSources')
-    classFile("${project.calculateBaseJavaPackage()}.config", 'LombokConfigurationKey') {
-        addImport("lombok.Builder")
-        addImport("lombok.NonNull")
-        addImport("lombok.Value")
-
-        line("@Value")
-        line("@Builder")
-        block("public class ${simpleName}") {
-            line("@NonNull String name;")
-            line("@NonNull String description;")
-            line("boolean deprecated;")
-        }
-    }
 
     classFile("${project.calculateBaseJavaPackage()}.config", 'LombokConfigurationKeys') {
         addStaticImport("lombok.AccessLevel", "PRIVATE")
 
         addImport("java.util.List")
-        addImport("javax.annotation.Nullable")
+        addImport("org.jspecify.annotations.Nullable")
         addImport("lombok.NoArgsConstructor")
 
         line("@NoArgsConstructor(access = PRIVATE)")

@@ -2,12 +2,13 @@ package name.remal.gradle_plugins.lombok.config;
 
 import static groovy.lang.Closure.DELEGATE_FIRST;
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 import static java.util.stream.StreamSupport.stream;
-import static name.remal.gradle_plugins.lombok.config.LombokConfigUtils.parseLombokConfigs;
 import static name.remal.gradle_plugins.toolkit.ClosureUtils.configureWith;
+import static name.remal.gradle_plugins.toolkit.FileCollectionUtils.finalizeFileCollectionValue;
 import static name.remal.gradle_plugins.toolkit.LayoutUtils.getRootPathOf;
 import static name.remal.gradle_plugins.toolkit.ReportContainerUtils.createReportContainerFor;
 import static name.remal.gradle_plugins.toolkit.VerificationExceptionUtils.newVerificationException;
@@ -21,10 +22,9 @@ import groovy.lang.DelegatesTo;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.ServiceLoader;
-import javax.annotation.Nullable;
 import lombok.Getter;
-import lombok.Setter;
 import name.remal.gradle_plugins.lombok.config.rule.LombokConfigRule;
 import name.remal.gradle_plugins.lombok.config.rule.LombokConfigValidationContext;
 import name.remal.gradle_plugins.toolkit.issues.CheckstyleHtmlIssuesRenderer;
@@ -35,7 +35,6 @@ import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
-import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.reporting.Reporting;
 import org.gradle.api.tasks.CacheableTask;
@@ -47,14 +46,18 @@ import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.VerificationTask;
 import org.intellij.lang.annotations.Language;
+import org.jspecify.annotations.Nullable;
 
 @CacheableTask
-@Setter
-public abstract class ValidateLombokConfig
-    extends DefaultTask
+public abstract class ValidateLombokConfig extends DefaultTask
     implements VerificationTask, Reporting<ValidateLombokConfigReports> {
 
     private boolean ignoreFailures;
+
+    @Override
+    public void setIgnoreFailures(boolean ignoreFailures) {
+        this.ignoreFailures = ignoreFailures;
+    }
 
     @Override
     @Internal
@@ -80,14 +83,24 @@ public abstract class ValidateLombokConfig
     @Internal
     public abstract ConfigurableFileCollection getDirectories();
 
-    @Internal
-    protected abstract ListProperty<LombokConfig> getLombokConfigs();
 
-    {
-        getLombokConfigs().addAll(getProject().provider(() ->
-            parseLombokConfigs(getDirectories().getFiles())
-        ));
+    @Nullable
+    @SuppressWarnings("java:S2065")
+    private transient volatile List<LombokConfig> lombokConfigs;
+
+    private List<LombokConfig> getLombokConfigs() {
+        if (lombokConfigs == null) {
+            synchronized (this) {
+                if (lombokConfigs == null) {
+                    var directories = getDirectories();
+                    finalizeFileCollectionValue(directories);
+                    lombokConfigs = LombokConfigUtils.parseLombokConfigs(directories.getFiles());
+                }
+            }
+        }
+        return requireNonNull(lombokConfigs);
     }
+
 
     @InputFiles
     @PathSensitive(RELATIVE)
@@ -96,10 +109,10 @@ public abstract class ValidateLombokConfig
 
     {
         getInvolvedPaths().from(getProject().provider(() ->
-            getLombokConfigs().get().stream()
+            getLombokConfigs().stream()
                 .map(LombokConfig::getInvolvedPaths)
                 .flatMap(Collection::stream)
-                .collect(toSet())
+                .collect(toCollection(LinkedHashSet::new))
         ));
     }
 
@@ -110,21 +123,16 @@ public abstract class ValidateLombokConfig
     @TaskAction
     @SuppressWarnings("Slf4jFormatShouldBeConst")
     public void execute() {
-        var lombokConfigs = getLombokConfigs().get();
-
         var disabledRules = getDisabledRules().get();
 
-        var rules = stream(
-            ServiceLoader.load(LombokConfigRule.class, LombokConfigRule.class.getClassLoader()).spliterator(),
-            false
-        )
-            .filter(not(rule -> disabledRules.contains(rule.getName())))
+        var rules = stream(ServiceLoader.load(LombokConfigRule.class, LombokConfigRule.class.getClassLoader())
+            .spliterator(), false).filter(not(rule -> disabledRules.contains(rule.getName())))
             .filter(not(rule -> rule.getAliases().stream().anyMatch(disabledRules::contains)))
             .collect(toList());
 
 
         var context = new Context();
-        for (var lombokConfig : lombokConfigs) {
+        for (var lombokConfig : getLombokConfigs()) {
             for (var rule : rules) {
                 rule.validate(lombokConfig, context);
             }
@@ -147,10 +155,8 @@ public abstract class ValidateLombokConfig
             getLogger().error(new TextIssuesRenderer().renderIssues(issues));
 
             if (!getIgnoreFailures()) {
-                throw newVerificationException(format(
-                    "Lombok config validation analysis failed with %d issues",
-                    issues.size()
-                ));
+                throw newVerificationException(format("Lombok config validation analysis failed with %d issues",
+                    issues.size()));
             }
         }
     }
@@ -181,13 +187,11 @@ public abstract class ValidateLombokConfig
 
         @Override
         public void report(String rule, Path path, @Nullable Integer lineNumber, @Language("TEXT") String message) {
-            issues.add(newIssueBuilder()
-                .sourceFile(path.toFile())
+            issues.add(newIssueBuilder().sourceFile(path.toFile())
                 .message(textMessageOf(message))
                 .rule(rule)
                 .startLine(lineNumber)
-                .build()
-            );
+                .build());
         }
 
     }

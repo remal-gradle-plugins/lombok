@@ -7,9 +7,9 @@ import java.io.InputStream;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.zip.ZipInputStream;
-import javax.annotation.Nullable;
 import lombok.SneakyThrows;
 import lombok.Value;
+import org.jspecify.annotations.Nullable;
 
 @Value
 public class LombokConfigPathArchive implements LombokConfigPath {
