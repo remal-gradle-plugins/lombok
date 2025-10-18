@@ -5,6 +5,7 @@ import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isRegularFile;
 import static java.nio.file.Files.readString;
 import static name.remal.gradle_plugins.toolkit.PathUtils.deleteRecursively;
+import static name.remal.gradle_plugins.toolkit.StringUtils.normalizeString;
 import static name.remal.gradle_plugins.toolkit.testkit.TestClasspath.getTestClasspathLibraryFullNotation;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -88,7 +89,9 @@ class LombokPluginFunctionalTest {
 
     @Test
     void lombokConfigValidationFails() {
-        project.assertBuildFails("validateLombokConfig");
+        var buildResult = project.assertBuildFails("validateLombokConfig");
+        assertThat(normalizeString(buildResult.getOutput()))
+            .contains("Lombok config validation analysis failed");
     }
 
     @Test
