@@ -1,4 +1,8 @@
+class ThisScriptLocation {}
+
 generateSources.forMainSourceSet.java {
+    inputs.dir(getClassLocationFile(ThisScriptLocation)).withNormalizer(ClasspathNormalizer).optional()
+
     inputs.files(configurations.lombokCoreArtifacts).withPropertyName('lombokCoreArtifacts')
     inputs.files(configurations.lombokAddonsArtifacts).withPropertyName('lombokAddonsArtifacts').optional()
 

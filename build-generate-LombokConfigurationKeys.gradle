@@ -15,7 +15,11 @@ import com.github.javaparser.ast.visitor.GenericVisitorAdapter
 import javax.inject.Inject
 import org.gradle.api.internal.file.FileOperations
 
+class ThisScriptLocation {}
+
 generateSources.forMainSourceSet.java {
+    inputs.dir(getClassLocationFile(ThisScriptLocation)).withNormalizer(ClasspathNormalizer).optional()
+
     Injections injections = project.objects.newInstance(Injections)
     inputs.files(configurations.lombokSources).withPropertyName('lombokSources')
 
