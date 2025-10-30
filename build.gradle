@@ -38,7 +38,6 @@ gradlePlugin {
             id = 'name.remal.lombok'
             implementationClass = 'name.remal.gradle_plugins.lombok.LombokPlugin'
             displayName = 'Configure Lombok annotation processor'
-            description = property('repository-description')
         }
     }
 }
