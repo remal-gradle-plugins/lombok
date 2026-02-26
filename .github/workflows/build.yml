@@ -224,7 +224,7 @@ jobs:
       id: download-exec-files
       uses: Wandalen/wretry.action/main@v3.8.0
       with:
-        action: actions/download-artifact@v8
+        action: actions/download-artifact@v7
         attempt_limit: 3
         attempt_delay: 5000
         with: |
@@ -234,7 +234,7 @@ jobs:
       run: |
         ./gradlew-retry-connection-timeouts jacocoMatrixReportMerged displayMatrixTotalCodeCoverage "-Pjacoco-all-exec-files-dir=build/jacoco-matrix-exec-files"
     - name: Upload Jacoco merged report
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@v6
       with:
         name: jacoco-matrix-merged-report
         path: build/reports/jacoco/jacocoMatrixReportMerged/
