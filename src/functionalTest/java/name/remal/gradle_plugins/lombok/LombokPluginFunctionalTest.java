@@ -27,6 +27,9 @@ class LombokPluginFunctionalTest {
 
     @BeforeEach
     void beforeEach() {
+        project.addForbiddenMessage("A terminally deprecated method in sun.misc.Unsafe has been called");
+        project.addForbiddenMessage("sun.misc.Unsafe::objectFieldOffset has been called by lombok.permit.Permit");
+
         project.forBuildFile(build -> {
             build.applyPlugin("name.remal.lombok");
             build.applyPlugin("java");
@@ -52,8 +55,10 @@ class LombokPluginFunctionalTest {
             "",
             "import lombok.Data;",
             "",
+            "/** Test class */",
             "@Data",
             "public class TestClass {",
+            "    /** Test field */",
             "    private String field;",
             "}"
         ));
