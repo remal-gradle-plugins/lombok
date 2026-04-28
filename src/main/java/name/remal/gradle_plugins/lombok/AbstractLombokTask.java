@@ -1,6 +1,9 @@
 package name.remal.gradle_plugins.lombok;
 
 import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
+import static name.remal.gradle_plugins.lombok.JavacAllowUnsafeAccessUtils.getJavacAllowUnsafeAccessJvmArgs;
+import static name.remal.gradle_plugins.lombok.JavacAllowUnsafeAccessUtils.shouldSuppressUnsafeWarningJvmArgsBeAdded;
 import static name.remal.gradle_plugins.lombok.JavacPackagesToOpenUtils.getJavacPackageOpenJvmArgs;
 import static name.remal.gradle_plugins.lombok.JavacPackagesToOpenUtils.shouldJavacPackageOpenJvmArgsBeAdded;
 import static name.remal.gradle_plugins.toolkit.JavaLauncherUtils.getJavaLauncherProviderFor;
@@ -25,6 +28,7 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.jvm.toolchain.JavaLauncher;
 import org.gradle.process.ExecOperations;
 import org.gradle.process.JavaExecSpec;
+import org.jspecify.annotations.Nullable;
 
 @CacheableTask
 public abstract class AbstractLombokTask extends DefaultTask {
@@ -65,7 +69,7 @@ public abstract class AbstractLombokTask extends DefaultTask {
 
     @TaskAction
     public void execute() {
-        AtomicReference<JavaExecSpec> execSpecRef = new AtomicReference<>();
+        AtomicReference<@Nullable JavaExecSpec> execSpecRef = new AtomicReference<>();
 
         getExecOperations().javaexec(execSpec -> {
             var javaLauncher = getJavaLauncher().get();
@@ -74,6 +78,9 @@ public abstract class AbstractLombokTask extends DefaultTask {
                 .orElseGet(JavaVersion::current);
             if (shouldJavacPackageOpenJvmArgsBeAdded(javaVersion)) {
                 execSpec.jvmArgs(getJavacPackageOpenJvmArgs());
+            }
+            if (shouldSuppressUnsafeWarningJvmArgsBeAdded(javaVersion)) {
+                execSpec.jvmArgs(getJavacAllowUnsafeAccessJvmArgs());
             }
             execSpec.setExecutable(javaLauncher.getExecutablePath().getAsFile());
             execSpec.setClasspath(getToolClasspath());
@@ -85,7 +92,7 @@ public abstract class AbstractLombokTask extends DefaultTask {
             execSpecRef.set(execSpec);
         });
 
-        afterExecute(execSpecRef.get());
+        afterExecute(requireNonNull(execSpecRef.get()));
 
         setDidWork(true);
     }

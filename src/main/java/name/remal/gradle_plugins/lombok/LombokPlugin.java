@@ -8,6 +8,8 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static name.remal.gradle_plugins.lombok.AnnotationProcessorsLombokOrderUtils.withFixedAnnotationProcessorFilesOrder;
 import static name.remal.gradle_plugins.lombok.AnnotationProcessorsLombokOrderUtils.withFixedAnnotationProcessorsOrder;
+import static name.remal.gradle_plugins.lombok.JavacAllowUnsafeAccessUtils.shouldSuppressUnsafeWarningJvmArgsBeAdded;
+import static name.remal.gradle_plugins.lombok.JavacAllowUnsafeAccessUtils.withJavacAllowUnsafeAccess;
 import static name.remal.gradle_plugins.lombok.JavacPackagesToOpenUtils.shouldJavacPackageOpenJvmArgsBeAdded;
 import static name.remal.gradle_plugins.lombok.JavacPackagesToOpenUtils.withJavacPackageOpens;
 import static name.remal.gradle_plugins.lombok.LombokDependencies.getLombokDependency;
@@ -185,9 +187,13 @@ public abstract class LombokPlugin implements Plugin<Project> {
                 }
 
                 var compileOptions = task.getOptions();
-                List<String> compilerArgs = compileOptions.getCompilerArgs();
-                compilerArgs = withJavacPackageOpens(compilerArgs);
-                compileOptions.setCompilerArgs(compilerArgs);
+                compileOptions.setFork(true);
+                var jvmArgs = compileOptions.getForkOptions().getJvmArgs();
+                jvmArgs = withJavacPackageOpens(jvmArgs);
+                if (shouldSuppressUnsafeWarningJvmArgsBeAdded(compilerJavaVersion)) {
+                    jvmArgs = withJavacAllowUnsafeAccess(jvmArgs);
+                }
+                compileOptions.getForkOptions().setJvmArgs(jvmArgs);
             });
         });
     }
