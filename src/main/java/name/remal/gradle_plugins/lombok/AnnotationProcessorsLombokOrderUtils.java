@@ -2,7 +2,7 @@ package name.remal.gradle_plugins.lombok;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
-import static java.util.Comparator.comparing;
+import static java.util.Comparator.comparingInt;
 import static lombok.AccessLevel.PRIVATE;
 import static name.remal.gradle_plugins.toolkit.ObjectUtils.isEmpty;
 
@@ -40,7 +40,7 @@ abstract class AnnotationProcessorsLombokOrderUtils {
         }
 
         var filesList = new ArrayList<>(files);
-        filesList.sort(comparing(AnnotationProcessorsLombokOrderUtils::getFileOrder));
+        filesList.sort(comparingInt(AnnotationProcessorsLombokOrderUtils::getFileOrder));
         return unmodifiableList(filesList);
     }
 
@@ -63,7 +63,7 @@ abstract class AnnotationProcessorsLombokOrderUtils {
         }
 
         var processorsList = new ArrayList<>(processors);
-        processorsList.sort(comparing(AnnotationProcessorsLombokOrderUtils::getProcessorOrder));
+        processorsList.sort(comparingInt(AnnotationProcessorsLombokOrderUtils::getProcessorOrder));
         return unmodifiableList(processorsList);
     }
 
