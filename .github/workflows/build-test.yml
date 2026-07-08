@@ -97,10 +97,11 @@ jobs:
           core.exportVariable('CURRENT_JAVA_VERSION', '${{fromJSON(inputs.job-matrix-json)['java-runtime'] || ''}}' || process.env.DEFAULT_JAVA_VERSION || '')
           core.exportVariable('DISABLE_COMPILATION', 'true')
           core.exportVariable('DISABLE_VERIFICATION_EXCEPT_TESTS', 'true')
-    - name: Cache Gradle
-      uses: remal-github-actions/cache-gradle@v1
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v6
       with:
-        github-job: 'test-${{inputs.os}}-${{inputs.job-matrix-json}}'
+        validate-wrappers: false
+        workflow-job-context: ${{inputs.job-matrix-json}}
     - name: Setup Java ${{env.CURRENT_JAVA_VERSION != env.DEFAULT_JAVA_VERSION && format('{0} and {1}', env.DEFAULT_JAVA_VERSION, env.CURRENT_JAVA_VERSION) || env.DEFAULT_JAVA_VERSION}}
       uses: actions/setup-java@v5
       with:
