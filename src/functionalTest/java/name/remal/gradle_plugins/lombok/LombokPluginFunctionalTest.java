@@ -7,6 +7,7 @@ import static java.nio.file.Files.readString;
 import static name.remal.gradle_plugins.toolkit.PathUtils.deleteRecursively;
 import static name.remal.gradle_plugins.toolkit.StringUtils.normalizeString;
 import static name.remal.gradle_plugins.toolkit.testkit.TestClasspath.getTestClasspathLibraryFullNotation;
+import static name.remal.gradle_plugins.toolkit.testkit.functional.generator.utils.MavenCentralRepositoryUtils.addMavenCentralRepository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.file.Path;
@@ -33,7 +34,7 @@ class LombokPluginFunctionalTest {
         project.forBuildFile(build -> {
             build.applyPlugin("name.remal.lombok");
             build.applyPlugin("java");
-            build.line("repositories { mavenCentral() }");
+            addMavenCentralRepository(build);
             build.line("tasks.withType(JavaCompile) { options.compilerArgs.add('-parameters') }");
             build.line(join("\n", new String[]{
                 "tasks.named('compileJava') {",
