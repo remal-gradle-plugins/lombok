@@ -1,10 +1,10 @@
 package name.remal.gradle_plugins.lombok;
 
 import static java.lang.String.join;
-import static name.remal.gradle_plugins.toolkit.testkit.functional.generator.utils.MavenCentralRepositoryUtils.addMavenCentralRepository;
 
 import lombok.RequiredArgsConstructor;
 import name.remal.gradle_plugins.toolkit.testkit.functional.GradleProject;
+import name.remal.gradle_plugins.toolkit.testkit.functional.generator.utils.MavenCentralRepositoryUtils;
 import org.junit.jupiter.api.Test;
 
 @RequiredArgsConstructor
@@ -16,9 +16,7 @@ class LombokPluginAppliedViaSettingsFunctionalTest {
     void appliedViaSettingsIsAppliedToProject() {
         project.forSettingsFile(settings -> {
             settings.applyPlugin("name.remal.lombok");
-            settings.block("dependencyResolutionManagement", dependencyResolutionManagement -> {
-                addMavenCentralRepository(dependencyResolutionManagement);
-            });
+            settings.block("dependencyResolutionManagement", MavenCentralRepositoryUtils::addMavenCentralRepository);
         });
 
         // The plugin must NOT be applied via the project's build file: it should reach the project
