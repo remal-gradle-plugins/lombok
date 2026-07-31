@@ -45,12 +45,12 @@ import name.remal.gradle_plugins.lombok.config.GenerateLombokConfig;
 import name.remal.gradle_plugins.lombok.config.LombokConfig;
 import name.remal.gradle_plugins.lombok.config.LombokConfigUtils;
 import name.remal.gradle_plugins.lombok.config.ValidateLombokConfig;
+import name.remal.gradle_plugins.toolkit.AbstractSettingsAwarePlugin;
 import name.remal.gradle_plugins.toolkit.JavaInstallationMetadataUtils;
 import name.remal.gradle_plugins.toolkit.ObjectUtils;
 import name.remal.gradle_plugins.toolkit.Version;
 import org.gradle.api.Action;
 import org.gradle.api.JavaVersion;
-import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
@@ -74,7 +74,7 @@ import org.gradle.jvm.toolchain.JavaCompiler;
 import org.jspecify.annotations.Nullable;
 
 @CustomLog
-public abstract class LombokPlugin implements Plugin<Project> {
+public abstract class LombokPlugin extends AbstractSettingsAwarePlugin {
 
     public static final String LOMBOK_EXTENSION_NAME = doNotInline("lombok");
     public static final String LOMBOK_CONFIGURATION_NAME = doNotInline("lombok");
@@ -83,7 +83,7 @@ public abstract class LombokPlugin implements Plugin<Project> {
     public static final String GENERATE_LOMBOK_CONFIG_TASK_NAME = doNotInline("generateLombokConfig");
 
     @Override
-    public void apply(Project project) {
+    protected void applyToProject(Project project) {
         var lombokExtension = project.getExtensions().create(LOMBOK_EXTENSION_NAME, LombokExtension.class);
 
         var lombokConf = getConfigurations().create(LOMBOK_CONFIGURATION_NAME, conf -> {
