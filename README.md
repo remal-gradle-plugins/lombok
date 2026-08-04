@@ -1,6 +1,6 @@
 **Tested on Java LTS versions from <!--property:java-runtime.min-version-->11<!--/property--> to <!--property:java-runtime.max-version-->26<!--/property-->.**
 
-**Tested on Gradle versions from <!--property:gradle-api.min-version-->7.0<!--/property--> to <!--property:gradle-api.max-version-->9.7.0-rc-2<!--/property-->.**
+**Tested on Gradle versions from <!--property:gradle-api.min-version-->7.0<!--/property--> to <!--property:gradle-api.max-version-->9.7.0-rc-3<!--/property-->.**
 
 # `name.remal.lombok` plugin
 
@@ -11,7 +11,7 @@ Usage:
 <!--plugin-usage:name.remal.lombok-->
 ```groovy
 plugins {
-    id 'name.remal.lombok' version '3.2.1'
+    id 'name.remal.lombok' version '3.2.2'
 }
 ```
 <!--/plugin-usage-->
