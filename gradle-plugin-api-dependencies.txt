@@ -3,5 +3,5 @@
 
 org.ow2.asm:asm-bom:9.10.1:@pom
 org.projectlombok:lombok-mapstruct-binding:0.2.0
-org.projectlombok:lombok:1.18.46
+org.projectlombok:lombok:1.18.48
 zzzz-classes-relying-on-gradle-internal-api:name.remal.gradle_plugins.lombok.LombokPlugin:cf2dca6ee86a34c8f412810e8d6530ab86f8c4f369d0c19a188e3502fbc35621
