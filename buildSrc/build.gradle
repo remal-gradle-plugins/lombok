@@ -2,7 +2,7 @@
 
 buildscript {
     dependencies {
-        classpath 'name.remal.gradle-plugins.toolkit:build-logic:0.79.3'
+        classpath 'name.remal.gradle-plugins.toolkit:build-logic:0.79.4'
     }
     repositories {
         if (System.getenv('CI') == 'true') {
